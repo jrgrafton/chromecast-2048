@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CCC226B2188726D700EFA0B9"
-               BuildableName = "HelloTextGoogleCast.app"
+               BuildableName = "Chromecast-2048.app"
                BlueprintName = "Chromecast-2048"
                ReferencedContainer = "container:Chromecast-2048.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CCC226D6188726D700EFA0B9"
-               BuildableName = "HelloTextGoogleCastTests.xctest"
+               BuildableName = "Chromecast-2048Tests.xctest"
                BlueprintName = "Chromecast-2048Tests"
                ReferencedContainer = "container:Chromecast-2048.xcodeproj">
             </BuildableReference>
@@ -43,7 +43,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CCC226B2188726D700EFA0B9"
-            BuildableName = "HelloTextGoogleCast.app"
+            BuildableName = "Chromecast-2048.app"
             BlueprintName = "Chromecast-2048"
             ReferencedContainer = "container:Chromecast-2048.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CCC226B2188726D700EFA0B9"
-            BuildableName = "HelloTextGoogleCast.app"
+            BuildableName = "Chromecast-2048.app"
             BlueprintName = "Chromecast-2048"
             ReferencedContainer = "container:Chromecast-2048.xcodeproj">
          </BuildableReference>
@@ -80,7 +80,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CCC226B2188726D700EFA0B9"
-            BuildableName = "HelloTextGoogleCast.app"
+            BuildableName = "Chromecast-2048.app"
             BlueprintName = "Chromecast-2048"
             ReferencedContainer = "container:Chromecast-2048.xcodeproj">
          </BuildableReference>

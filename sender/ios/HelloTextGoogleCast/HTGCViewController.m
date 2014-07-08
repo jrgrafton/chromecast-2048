@@ -18,12 +18,16 @@
 static NSString *const kReceiverAppID = @"33AA2579";
 
 @interface HTGCViewController () {
-
   UITextField *messageTextField;
   UIImage *_btnImage;
   UIImage *_btnImageSelected;
+ 
+  // Touch vars
+  CGFloat _dragThreshold;
+  CGPoint _lastTouch;
 }
 
+// Chromecast properties
 @property GCKApplicationMetadata *applicationMetadata;
 @property GCKDevice *selectedDevice;
 @property HTGCTextChannel *textChannel;
@@ -55,6 +59,12 @@ static NSString *const kReceiverAppID = @"33AA2579";
   self.deviceScanner = [[GCKDeviceScanner alloc] init];
   [self.deviceScanner addListener:self];
   [self.deviceScanner startScan];
+    
+  // Initialise defaults in UI
+  CGRect screenRect = [[UIScreen mainScreen] bounds];
+  CGFloat screenWidth = screenRect.size.width;
+  _dragThreshold = screenWidth * [self.slider value];
+  [[self sliderLabel] setText:[NSString stringWithFormat:@"%dpx", (int)_dragThreshold]];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -144,24 +154,6 @@ static NSString *const kReceiverAppID = @"33AA2579";
     }
   }
 
-}
-- (IBAction)sendText:(id)sender {
-  NSInteger tag = [sender tag];
-  NSLog(@"sending text %d", tag);
-
-  //Show alert if not connected
-  if (!self.deviceManager || !self.deviceManager.isConnected) {
-    UIAlertView *alert =
-        [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Not Connected", nil)
-                                   message:NSLocalizedString(@"Please connect to Cast device", nil)
-                                  delegate:nil
-                         cancelButtonTitle:NSLocalizedString(@"OK", nil)
-                         otherButtonTitles:nil];
-    [alert show];
-    return;
-  }
-
-  [self.textChannel sendTextMessage:[NSString stringWithFormat:@"%d", tag]];
 }
 
 #pragma mark - GCKDeviceScannerListener
@@ -259,7 +251,130 @@ static NSString *const kReceiverAppID = @"33AA2579";
   NSLog(@"Received device status: %@", applicationMetadata);
 }
 
-#pragma mark - misc
+#pragma mark Event listeners
+- (IBAction)sendText:(id)sender {
+    NSInteger tag = [sender tag];
+    NSLog(@"sending text %d", tag);
+    
+    //Show alert if not connected
+    if (!self.deviceManager || !self.deviceManager.isConnected) {
+        UIAlertView *alert =
+        [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Not Connected", nil)
+                                   message:NSLocalizedString(@"Please connect to Cast device", nil)
+                                  delegate:nil
+                         cancelButtonTitle:NSLocalizedString(@"OK", nil)
+                         otherButtonTitles:nil];
+        [alert show];
+        return;
+    }
+    
+    [self.textChannel sendTextMessage:[NSString stringWithFormat:@"%d", tag]];
+}
+
+- (IBAction)sliderMoved:(id)sender {
+    UISlider *slider = (UISlider *)sender;
+    CGRect screenRect = [[UIScreen mainScreen] bounds];
+    CGFloat screenWidth = screenRect.size.width;
+    _dragThreshold = screenWidth * [slider value];
+    
+    [[self sliderLabel] setText:[NSString stringWithFormat:@"%dpx", (int)_dragThreshold]];
+    NSLog(@"_dragThreshold ... %d",(int)_dragThreshold);
+}
+
+#pragma mark - Touch functionality
+-(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    // Remove old red circles on screen
+    NSArray *subviews = [self.view subviews];
+    for (UIView *view in subviews) {
+        if(view.tag == -1) {
+            [view removeFromSuperview];
+        };
+    }
+    
+    // Enumerate over all the touches and draw a red dot on the screen where the touches were
+    [touches enumerateObjectsUsingBlock:^(id obj, BOOL *stop) {
+        // Get a single touch and it's location
+        UITouch *touch = obj;
+        _lastTouch = [touch locationInView:self.view];
+        
+        // Draw a red circle where the touch occurred
+        UIView *touchView = [[UIView alloc] init];
+        [touchView setBackgroundColor:[UIColor redColor]];
+        touchView.frame = CGRectMake(_lastTouch.x - 15, _lastTouch.y - 15, 30, 30);
+        touchView.layer.cornerRadius = 15;
+        touchView.tag = -1;
+        [self.view addSubview:touchView];
+    }];
+}
+
+-(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    // Remove old red circles on screen
+    NSArray *subviews = [self.view subviews];
+    for (UIView *view in subviews) {
+        if(view.tag == -1) {
+            [view removeFromSuperview];
+        }
+    }
+    
+    // Enumerate over all the touches and draw a red dot on the screen where the touches were
+    [touches enumerateObjectsUsingBlock:^(id obj, BOOL *stop) {
+        // Get a single touch and it's location
+        UITouch *touch = obj;
+        CGPoint touchPoint = [touch locationInView:self.view];
+        
+        // Draw a line from start to end
+        UIView *lineView = [[UIView alloc] init];
+        lineView.tag = -1;
+        UIBezierPath *path = [UIBezierPath bezierPath];
+        [path moveToPoint:CGPointMake(_lastTouch.x, _lastTouch.y)];
+        [path addLineToPoint:CGPointMake(touchPoint.x, touchPoint.y)];
+        CAShapeLayer *shapeLayer = [CAShapeLayer layer];
+        shapeLayer.path = [path CGPath];
+        shapeLayer.strokeColor = [[UIColor blackColor] CGColor];
+        shapeLayer.lineWidth = 2.0;
+        shapeLayer.fillColor = [[UIColor clearColor] CGColor];
+        [lineView.layer addSublayer:shapeLayer];
+        [self.view addSubview:lineView];
+        
+        // Draw a red circle where the touch occurred
+        UIView *touchView = [[UIView alloc] init];
+        [touchView setBackgroundColor:[UIColor redColor]];
+        touchView.frame = CGRectMake(touchPoint.x - 15, touchPoint.y - 15, 30, 30);
+        touchView.layer.cornerRadius = 15;
+        touchView.tag = -1;
+        [self.view addSubview:touchView];
+        
+        // Update debug text
+        NSInteger yDiff = _lastTouch.y - touchPoint.y;
+        NSInteger xDiff = _lastTouch.x - touchPoint.x;
+        
+        NSInteger up = (yDiff > 0)? yDiff : 0;
+        NSInteger down = (yDiff > 0)? 0 : abs(yDiff);
+        NSInteger left = (xDiff > 0)? xDiff : 0;
+        NSInteger right = (xDiff > 0)? 0 : abs(xDiff);
+        
+        NSString* debugText = [NSString stringWithFormat:@"[up: %d] [right: %d] [down: %d] [left: %d]", up, right, down, left];
+        [self.dragDebug setText:debugText];
+        
+        // Detect if we should trigger a move - very much 'POC' code!
+        if(up >= _dragThreshold) {
+            [self.textChannel sendTextMessage:[NSString stringWithFormat:@"%d", 0]];
+        } else if(right >= _dragThreshold) {
+            [self.textChannel sendTextMessage:[NSString stringWithFormat:@"%d", 1]];
+        } else if(down >= _dragThreshold) {
+            [self.textChannel sendTextMessage:[NSString stringWithFormat:@"%d", 2]];
+        } else if(left >= _dragThreshold) {
+            [self.textChannel sendTextMessage:[NSString stringWithFormat:@"%d", 3]];
+        }
+        
+        // Reset touch point
+        if(up > _dragThreshold || right > _dragThreshold || down > _dragThreshold || left > _dragThreshold) {
+            _lastTouch = touchPoint;
+        }
+    }];
+}
+
+#pragma mark - Error handling
 - (void)showError:(NSError *)error {
   UIAlertView *alert = [[UIAlertView alloc] initWithTitle:NSLocalizedString(@"Error", nil)
                                                   message:NSLocalizedString(error.description, nil)

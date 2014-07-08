@@ -24,5 +24,8 @@
 @property(nonatomic, strong) UIButton* chromecastButton;
 @property(nonatomic, strong) GCKDeviceManager* deviceManager;
 @property(nonatomic, readonly) GCKMediaInformation* mediaInformation;
+@property(nonatomic) UISlider IBOutlet *slider;
+@property(nonatomic) UILabel IBOutlet *sliderLabel;
+@property(nonatomic) UILabel IBOutlet *dragDebug;
 
 @end
