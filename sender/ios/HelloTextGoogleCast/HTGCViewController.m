@@ -25,6 +25,7 @@ static NSString *const kReceiverAppID = @"33AA2579";
   // Touch vars
   CGFloat _dragThreshold;
   CGPoint _lastTouch;
+  BOOL _dragEventTriggered;
 }
 
 // Chromecast properties
@@ -65,6 +66,7 @@ static NSString *const kReceiverAppID = @"33AA2579";
   CGFloat screenWidth = screenRect.size.width;
   _dragThreshold = screenWidth * [self.slider value];
   [[self sliderLabel] setText:[NSString stringWithFormat:@"%dpx", (int)_dragThreshold]];
+  _dragEventTriggered = NO;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -283,6 +285,9 @@ static NSString *const kReceiverAppID = @"33AA2579";
 
 #pragma mark - Touch functionality
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    // Reset _dragEventTriggered flag
+    _dragEventTriggered = NO;
+    
     // Remove old red circles on screen
     NSArray *subviews = [self.view subviews];
     for (UIView *view in subviews) {
@@ -315,6 +320,11 @@ static NSString *const kReceiverAppID = @"33AA2579";
         if(view.tag == -1) {
             [view removeFromSuperview];
         }
+    }
+    
+    if(_dragEventTriggered) {
+        // One drag can only trigger one event
+        return;
     }
     
     // Enumerate over all the touches and draw a red dot on the screen where the touches were
@@ -372,6 +382,7 @@ static NSString *const kReceiverAppID = @"33AA2579";
         // Reset touch point
         if(up > _dragThreshold || right > _dragThreshold || down > _dragThreshold || left > _dragThreshold) {
             _lastTouch = touchPoint;
+            _dragEventTriggered = YES;
         }
     }];
 }
