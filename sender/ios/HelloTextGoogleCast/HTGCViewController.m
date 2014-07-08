@@ -299,6 +299,7 @@ static NSString *const kReceiverAppID = @"33AA2579";
         
         // Draw a red circle where the touch occurred
         UIView *touchView = [[UIView alloc] init];
+        [touchView setUserInteractionEnabled:NO];
         [touchView setBackgroundColor:[UIColor redColor]];
         touchView.frame = CGRectMake(_lastTouch.x - 15, _lastTouch.y - 15, 30, 30);
         touchView.layer.cornerRadius = 15;
@@ -338,6 +339,7 @@ static NSString *const kReceiverAppID = @"33AA2579";
         
         // Draw a red circle where the touch occurred
         UIView *touchView = [[UIView alloc] init];
+        [touchView setUserInteractionEnabled:NO];
         [touchView setBackgroundColor:[UIColor redColor]];
         touchView.frame = CGRectMake(touchPoint.x - 15, touchPoint.y - 15, 30, 30);
         touchView.layer.cornerRadius = 15;
