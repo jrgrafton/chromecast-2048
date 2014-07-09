@@ -43,25 +43,22 @@ Chromecast2048.prototype.setupReceiverManager = function() {
 Chromecast2048.prototype.attachMessageChannelToReceiver = function(senderId) {
     console.log("Requesting socket for: " + senderId);
     var messageChannel = this.customMessageBus.getCastChannel(senderId);
-    messageChannel.onMessage = (function(messageChannel) {
-        return function(event) {
-            var debugString = "message: " + event.data + " from " + messageChannel.getSenderId();
-            document.getElementById("debug-text").innerHTML = debugString;
-            console.log(debugString);
+    messageChannel.onMessage = function(event) {
+        var debugString = "message: " + event.data + " from " + this.getSenderId();
+        console.log(debugString);
 
-            switch (event.data) {
-                case "0" :
-                case "1" :
-                case "2" :
-                case "3" :
-                    window.game.move(event.data);
-                    break;
-                case "4" :
-                    window.game.restart();
-                    break;
-            }
+        switch (event.data) {
+            case "0" :
+            case "1" :
+            case "2" :
+            case "3" :
+                window.game.move(event.data);
+                break;
+            case "4" :
+                window.game.restart();
+                break;
         }
-    })(messageChannel);
+    };
 }
 
 Chromecast2048.prototype.startGame = function() {
