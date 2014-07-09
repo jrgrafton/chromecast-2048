@@ -26,9 +26,9 @@ Chromecast2048.prototype.setupReceiverManager = function() {
     this.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
     this.customMessageBus = this.castReceiverManager.getCastMessageBus('urn:x-cast:com.twjg.chromecast2048');
 
-    this.castReceiverManager.onSenderConnected = function(senderId, userAgent) {
-        console.log("Sender connected: " + senderId);
-        this.attachMessageChannelToReceiver(senderId);
+    this.castReceiverManager.onSenderConnected = function(event) {
+        console.log("Sender connected: " + event.senderId);
+        this.attachMessageChannelToReceiver(event.senderId);
     }.bind(this);
 
     // Cast receiver definitions
