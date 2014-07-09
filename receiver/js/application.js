@@ -44,15 +44,16 @@ Chromecast2048.prototype.attachMessageChannelToReceiver = function(senderId) {
     console.log("Requesting socket for: " + senderId);
     var messageChannel = this.customMessageBus.getCastChannel(senderId);
     messageChannel.onMessage = function(event) {
-        var debugString = "message: " + event.data + " from " + this.getSenderId();
+        console.log(event);
+        var debugString = "message: " + event.message + " from " + this.getSenderId();
         console.log(debugString);
 
-        switch (event.data) {
+        switch (event.message) {
             case "0" :
             case "1" :
             case "2" :
             case "3" :
-                window.game.move(event.data);
+                window.game.move(event.message);
                 break;
             case "4" :
                 window.game.restart();
