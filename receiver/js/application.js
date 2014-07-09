@@ -45,7 +45,7 @@ Chromecast2048.prototype.attachMessageChannelToReceiver = function(senderId) {
     var messageChannel = this.customMessageBus.getCastChannel(senderId);
     messageChannel.onMessage = (function(messageChannel) {
         return function(event) {
-            var debugString = "message: " + e.data + " from " + messageChannel.getSenderId();
+            var debugString = "message: " + event.data + " from " + messageChannel.getSenderId();
             document.getElementById("debug-text").innerHTML = debugString;
             console.log(debugString);
 
