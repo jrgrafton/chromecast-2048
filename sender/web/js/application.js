@@ -22,8 +22,9 @@ Chromecast2048.prototype = {
         var sessionRequest = new chrome.cast.SessionRequest(this.applicationID);
         var apiConfig = new chrome.cast.ApiConfig(sessionRequest,
         function(e) {
-            console.log('New session ID:' + e.sessionId);
-        },
+            this.session = e;
+            console.log('connected to session: ' + e.sessionId);
+        }.bind(this),
         function(e){
             if (e === 'available') { console.log('receiver found'); }
             else { console.log('receiver list empty'); }
@@ -33,16 +34,22 @@ Chromecast2048.prototype = {
         chrome.cast.initialize(apiConfig,
         function() {
             // Devices are available and can be connected to, lets grab a session
-            console.log("initialization success, requesting session");
-            chrome.cast.requestSession(function(e) {
-                // Session established (receiver will have launched by this point)
-                console.log('session request success');
-                this.session = e;
-            }.bind(this),
-            function(e) {
-                console.log('session request failure');
-                console.log(e);
-            });
+            console.log("initialization success");
+            setTimeout(function() {
+                if(this.session == null) {
+                    console.log("no existing session found - requesting new one");
+                    chrome.cast.requestSession(function(e) {
+                        // Session established (receiver will have launched by this point)
+                        console.log('session request success');
+                        this.session = e;
+                    }.bind(this),
+                    function(e) {
+                        console.log('session request failure');
+                        console.log(e);
+                    });
+                }
+            }.bind(this), 1000);
+            
         }.bind(this),
         function(e){
             console.log("initialization failure");
@@ -70,8 +77,8 @@ Chromecast2048.prototype = {
     },
     // Send message
     sendMessage : function(message){
-        var sendTime = new Date().getTime();
         console.log("sending message: " + message);
+        var sendTime = new Date().getTime();
         this.session.sendMessage("urn:x-cast:com.twjg.chromecast2048", message, 
         function(){ 
             console.log("send message success: " + message) 

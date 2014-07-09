@@ -44,7 +44,6 @@ Chromecast2048.prototype.attachMessageChannelToReceiver = function(senderId) {
     console.log("Requesting socket for: " + senderId);
     var messageChannel = this.customMessageBus.getCastChannel(senderId);
     messageChannel.onMessage = function(event) {
-        console.log(event);
         var debugString = "message: " + event.message + " from " + this.getSenderId();
         console.log(debugString);
 
