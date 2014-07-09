@@ -13,7 +13,6 @@ function Chromecast2048() {
     }  
 
     this.setupReceiverManager();
-    this.setupMessageBus();
     this.startReceiverManager();
     
     this.startGame();
@@ -25,8 +24,10 @@ Chromecast2048.prototype.startReceiverManager = function() {
 
 Chromecast2048.prototype.setupReceiverManager = function() {
     this.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
+    this.customMessageBus = this.castReceiverManager.getCastMessageBus('urn:x-cast:com.twjg.chromecast2048');
 
     this.castReceiverManager.onSenderConnected = function(senderId, userAgent) {
+        console.log("Sender connected: " + senderId);
         this.attachMessageChannelToReceiver(senderId);
     }.bind(this);
 
@@ -39,11 +40,8 @@ Chromecast2048.prototype.setupReceiverManager = function() {
     }.bind(this);
 }
 
-Chromecast2048.prototype.setupMessageBus = function() {
-    this.customMessageBus = this.castReceiverManager.getCastMessageBus('urn:x-cast:com.twjg.chromecast2048');
-}
-
 Chromecast2048.prototype.attachMessageChannelToReceiver = function(senderId) {
+    console.log("Requesting socket for: " + senderId);
     var messageChannel = this.customMessageBus.getCastChannel(senderId);
     messageChannel.onMessage = (function(messageChannel) {
         return function(event) {
