@@ -21,6 +21,9 @@ static NSString *const kReceiverAppID = @"33AA2579";
   UITextField *messageTextField;
   UIImage *_btnImage;
   UIImage *_btnImageSelected;
+    
+  // Reconnection vars
+  BOOL _reconnecting;
  
   // Touch vars
   CGFloat _dragThreshold;
@@ -60,6 +63,9 @@ static NSString *const kReceiverAppID = @"33AA2579";
   self.deviceScanner = [[GCKDeviceScanner alloc] init];
   [self.deviceScanner addListener:self];
   [self.deviceScanner startScan];
+    
+  // Initialise defaults for Chromecast client?
+  _reconnecting = NO;
     
   // Initialise defaults in UI
   CGRect screenRect = [[UIScreen mainScreen] bounds];
@@ -161,6 +167,17 @@ static NSString *const kReceiverAppID = @"33AA2579";
 #pragma mark - GCKDeviceScannerListener
 - (void)deviceDidComeOnline:(GCKDevice *)device {
   NSLog(@"device found!! %@", device.friendlyName);
+  
+  // Reconnect to previous device
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  NSString* lastDeviceID = [defaults objectForKey:@"lastDeviceID"];
+  if(lastDeviceID != nil && [[device deviceID] isEqualToString:lastDeviceID]) {
+    NSLog(@"reconnecting to old device %@", [device deviceID]);
+    _reconnecting = YES;
+    self.selectedDevice = device;
+    [self connectToDevice];
+  }
+    
   [self updateButtonStates];
 }
 
@@ -188,6 +205,12 @@ static NSString *const kReceiverAppID = @"33AA2579";
 
       [self deviceDisconnected];
       [self updateButtonStates];
+        
+      // Remove previously stored deviceID
+      NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+      [defaults removeObjectForKey:@"lastDeviceID"];
+      [defaults synchronize];
+        
     } else if (buttonIndex == 0) {
       // Join the existing session.
 
@@ -196,14 +219,17 @@ static NSString *const kReceiverAppID = @"33AA2579";
 }
 
 #pragma mark - GCKDeviceManagerDelegate
-
 - (void)deviceManagerDidConnect:(GCKDeviceManager *)deviceManager {
-  NSLog(@"connected!!");
-
+  NSLog(@"connected");
   [self updateButtonStates];
-
-  //launch application after getting connectted
-  [self.deviceManager launchApplication:kReceiverAppID];
+    
+  if(!_reconnecting) {
+    [self.deviceManager launchApplication:kReceiverAppID];
+  } else {
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSString* lastSessionID = [defaults valueForKey:@"lastSessionID"];
+    [self.deviceManager joinApplication:kReceiverAppID sessionID:lastSessionID];
+  }
 }
 
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
@@ -212,6 +238,12 @@ static NSString *const kReceiverAppID = @"33AA2579";
             launchedApplication:(BOOL)launchedApplication {
   NSLog(@"application has launched %hhd", launchedApplication);
 
+  // Store sessionID in case of restart
+  NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+  [defaults setObject:sessionID forKey:@"lastSessionID"];
+  [defaults setObject:[self.selectedDevice deviceID] forKey:@"lastDeviceID"];
+  [defaults synchronize];
+    
   self.textChannel =
       [[HTGCTextChannel alloc] initWithNamespace:@"urn:x-cast:com.twjg.chromecast2048"];
   [self.deviceManager addChannel:self.textChannel];
@@ -219,7 +251,13 @@ static NSString *const kReceiverAppID = @"33AA2579";
 
 - (void)deviceManager:(GCKDeviceManager *)deviceManager
     didFailToConnectToApplicationWithError:(NSError *)error {
-  [self showError:error];
+    if(_reconnecting && [error code] == GCKErrorCodeApplicationNotRunning) {
+        // Expected error when unable to reconnect to previous session after another
+        // application has been running
+        _reconnecting = false;
+    } else {
+        [self showError:error];
+    }
 
   [self deviceDisconnected];
   [self updateButtonStates];
