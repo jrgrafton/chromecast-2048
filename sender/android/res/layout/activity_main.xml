@@ -50,25 +50,29 @@
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:text="@string/up_button_title"
-            android:id="@+id/upButton"/>
+            android:id="@+id/upButton"
+            android:hint="0" />
 
         <Button
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:text="@string/right_button_title"
-            android:id="@+id/rightButton"/>
+            android:id="@+id/rightButton"
+            android:hint="1" />
 
         <Button
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:text="@string/down_button_title"
-            android:id="@+id/downButton" />
+            android:id="@+id/downButton"
+            android:hint="2" />
 
         <Button
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:text="@string/left_button_title"
-            android:id="@+id/leftButton" />
+            android:id="@+id/leftButton"
+            android:hint="3" />
     </LinearLayout>
 
     <Button
@@ -78,7 +82,8 @@
         android:id="@+id/resetButton"
         android:layout_below="@+id/buttonsView"
         android:layout_marginTop="10dp"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:hint="4" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -121,7 +126,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Drag anywhere to\ntrigger move"
+            android:text="@string/drag_area_label"
             android:id="@+id/dragAreaLabel"
             android:layout_gravity="center"
             android:gravity="center"

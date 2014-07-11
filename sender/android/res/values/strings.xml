@@ -31,4 +31,5 @@
     <string name="restart_button_title">RESTART</string>
 
     <string name="seekbar_label">Slide to change drag threshold</string>
+    <string name="drag_area_label">Drag anywhere to\ntrigger move</string>
 </resources>

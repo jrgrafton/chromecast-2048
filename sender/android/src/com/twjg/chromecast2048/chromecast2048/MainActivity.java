@@ -81,16 +81,6 @@ public class MainActivity extends ActionBarActivity {
 		actionBar.setBackgroundDrawable(new ColorDrawable(
 				android.R.color.transparent));
 
-		// When the user clicks on the button, use Android voice recognition to
-		// get text
-		Button voiceButton = (Button) findViewById(R.id.voiceButton);
-		voiceButton.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				startVoiceRecognitionActivity();
-			}
-		});
-
 		// Configure Cast device discovery
 		mMediaRouter = MediaRouter.getInstance(getApplicationContext());
 		mMediaRouteSelector = new MediaRouteSelector.Builder()
@@ -98,38 +88,32 @@ public class MainActivity extends ActionBarActivity {
 						CastMediaControlIntent.categoryForCast(getResources()
 								.getString(R.string.app_id))).build();
 		mMediaRouterCallback = new MyMediaRouterCallback();
+
+        // Attach button listeners
+        this.attachButtonListeners();
 	}
 
-	/**
-	 * Android voice recognition
-	 */
-	private void startVoiceRecognitionActivity() {
-		Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-		intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-				RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-		intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-				getString(R.string.message_to_cast));
-		startActivityForResult(intent, REQUEST_CODE);
-	}
+    /**
+     * Sends commands over to Chromecast
+     */
+    private void attachButtonListeners() {
+        ArrayList <Button> buttons = new ArrayList<Button>(5);
+        buttons.add((Button) findViewById(R.id.upButton));
+        buttons.add((Button) findViewById(R.id.rightButton));
+        buttons.add((Button) findViewById(R.id.downButton));
+        buttons.add((Button) findViewById(R.id.leftButton));
+        buttons.add((Button) findViewById(R.id.resetButton));
 
-	/*
-	 * Handle the voice recognition response
-	 * 
-	 * @see android.support.v4.app.FragmentActivity#onActivityResult(int, int,
-	 * android.content.Intent)
-	 */
-	@Override
-	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-			ArrayList<String> matches = data
-					.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-			if (matches.size() > 0) {
-				Log.d(TAG, matches.get(0));
-				sendMessage(matches.get(0));
-			}
-		}
-		super.onActivityResult(requestCode, resultCode, data);
-	}
+        for(Button button : buttons) {
+            button.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Button button = (Button) v;
+                    MainActivity.this.sendMessage((String) button.getHint());
+                }
+            });
+        }
+    }
 
 	@Override
 	protected void onResume() {

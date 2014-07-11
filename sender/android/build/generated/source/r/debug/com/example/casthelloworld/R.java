@@ -1107,11 +1107,16 @@ containing a value of this type.
         public static final int activity_chooser_view_content=0x7f070028;
         public static final int always=0x7f070012;
         public static final int beginning=0x7f07000a;
+        public static final int buttonsView=0x7f070040;
         public static final int checkbox=0x7f070030;
         public static final int collapseActionView=0x7f070014;
+        public static final int debugText=0x7f07004b;
         public static final int default_activity_button=0x7f07002b;
         public static final int dialog=0x7f070015;
         public static final int disableHome=0x7f070008;
+        public static final int downButton=0x7f070043;
+        public static final int dragArea=0x7f070049;
+        public static final int dragAreaLabel=0x7f07004a;
         public static final int dropdown=0x7f070016;
         public static final int edit_query=0x7f070033;
         public static final int end=0x7f07000c;
@@ -1123,14 +1128,15 @@ containing a value of this type.
         public static final int icon=0x7f07002d;
         public static final int ifRoom=0x7f070011;
         public static final int image=0x7f07002a;
+        public static final int leftButton=0x7f070044;
         public static final int listMode=0x7f070001;
         public static final int list_item=0x7f07002c;
-        public static final int media_route_control_frame=0x7f070043;
-        public static final int media_route_disconnect_button=0x7f070044;
-        public static final int media_route_list=0x7f070040;
-        public static final int media_route_menu_item=0x7f070045;
-        public static final int media_route_volume_layout=0x7f070041;
-        public static final int media_route_volume_slider=0x7f070042;
+        public static final int media_route_control_frame=0x7f07004f;
+        public static final int media_route_disconnect_button=0x7f070050;
+        public static final int media_route_list=0x7f07004c;
+        public static final int media_route_menu_item=0x7f070051;
+        public static final int media_route_volume_layout=0x7f07004d;
+        public static final int media_route_volume_slider=0x7f07004e;
         public static final int middle=0x7f07000b;
         public static final int never=0x7f070010;
         public static final int none=0x7f070009;
@@ -1138,6 +1144,8 @@ containing a value of this type.
         public static final int progress_circular=0x7f07001b;
         public static final int progress_horizontal=0x7f07001c;
         public static final int radio=0x7f070032;
+        public static final int resetButton=0x7f070045;
+        public static final int rightButton=0x7f070042;
         public static final int satellite=0x7f07000d;
         public static final int search_badge=0x7f070035;
         public static final int search_bar=0x7f070034;
@@ -1149,6 +1157,9 @@ containing a value of this type.
         public static final int search_plate=0x7f070039;
         public static final int search_src_text=0x7f07003a;
         public static final int search_voice_btn=0x7f07003e;
+        public static final int seekBar=0x7f070047;
+        public static final int seekBarLabel=0x7f070046;
+        public static final int seekBarValue=0x7f070048;
         public static final int shortcut=0x7f070031;
         public static final int showCustom=0x7f070007;
         public static final int showHome=0x7f070004;
@@ -1157,11 +1168,12 @@ containing a value of this type.
         public static final int submit_area=0x7f07003c;
         public static final int tabMode=0x7f070002;
         public static final int terrain=0x7f07000e;
+        public static final int textView=0x7f07003f;
         public static final int title=0x7f07002e;
         public static final int top_action_bar=0x7f070023;
         public static final int up=0x7f070024;
+        public static final int upButton=0x7f070041;
         public static final int useLogo=0x7f070003;
-        public static final int voiceButton=0x7f07003f;
         public static final int withText=0x7f070013;
     }
     public static final class integer {
@@ -1244,16 +1256,23 @@ containing a value of this type.
         public static final int common_google_play_services_update_title=0x7f0a0027;
         public static final int common_signin_button_text=0x7f0a0028;
         public static final int common_signin_button_text_long=0x7f0a0029;
-        public static final int instructions=0x7f0a002a;
-        public static final int media_route_menu_title=0x7f0a002b;
-        public static final int message_to_cast=0x7f0a002c;
-        public static final int mr_media_route_button_content_description=0x7f0a002d;
-        public static final int mr_media_route_chooser_searching=0x7f0a002e;
-        public static final int mr_media_route_chooser_title=0x7f0a002f;
-        public static final int mr_media_route_controller_disconnect=0x7f0a0030;
-        public static final int mr_system_route_name=0x7f0a0031;
-        public static final int mr_user_route_category_name=0x7f0a0032;
-        public static final int namespace=0x7f0a0033;
+        public static final int down_button_title=0x7f0a002a;
+        public static final int drag_area_label=0x7f0a002b;
+        public static final int instructions=0x7f0a002c;
+        public static final int left_button_title=0x7f0a002d;
+        public static final int media_route_menu_title=0x7f0a002e;
+        public static final int message_to_cast=0x7f0a002f;
+        public static final int mr_media_route_button_content_description=0x7f0a0030;
+        public static final int mr_media_route_chooser_searching=0x7f0a0031;
+        public static final int mr_media_route_chooser_title=0x7f0a0032;
+        public static final int mr_media_route_controller_disconnect=0x7f0a0033;
+        public static final int mr_system_route_name=0x7f0a0034;
+        public static final int mr_user_route_category_name=0x7f0a0035;
+        public static final int namespace=0x7f0a0036;
+        public static final int restart_button_title=0x7f0a0037;
+        public static final int right_button_title=0x7f0a0038;
+        public static final int seekbar_label=0x7f0a0039;
+        public static final int up_button_title=0x7f0a003a;
     }
     public static final class style {
         /** 

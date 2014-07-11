@@ -299,11 +299,11 @@ public final class R {
 		public static final int image = 0x7f07002a;
 		public static final int listMode = 0x7f070001;
 		public static final int list_item = 0x7f07002c;
-		public static final int media_route_control_frame = 0x7f070043;
-		public static final int media_route_disconnect_button = 0x7f070044;
-		public static final int media_route_list = 0x7f070040;
-		public static final int media_route_volume_layout = 0x7f070041;
-		public static final int media_route_volume_slider = 0x7f070042;
+		public static final int media_route_control_frame = 0x7f07004f;
+		public static final int media_route_disconnect_button = 0x7f070050;
+		public static final int media_route_list = 0x7f07004c;
+		public static final int media_route_volume_layout = 0x7f07004d;
+		public static final int media_route_volume_slider = 0x7f07004e;
 		public static final int middle = 0x7f07000b;
 		public static final int never = 0x7f070010;
 		public static final int none = 0x7f070009;
@@ -380,12 +380,12 @@ public final class R {
 		public static final int abc_searchview_description_voice = 0x7f0a000a;
 		public static final int abc_shareactionprovider_share_with = 0x7f0a000b;
 		public static final int abc_shareactionprovider_share_with_application = 0x7f0a000c;
-		public static final int mr_media_route_button_content_description = 0x7f0a002d;
-		public static final int mr_media_route_chooser_searching = 0x7f0a002e;
-		public static final int mr_media_route_chooser_title = 0x7f0a002f;
-		public static final int mr_media_route_controller_disconnect = 0x7f0a0030;
-		public static final int mr_system_route_name = 0x7f0a0031;
-		public static final int mr_user_route_category_name = 0x7f0a0032;
+		public static final int mr_media_route_button_content_description = 0x7f0a0030;
+		public static final int mr_media_route_chooser_searching = 0x7f0a0031;
+		public static final int mr_media_route_chooser_title = 0x7f0a0032;
+		public static final int mr_media_route_controller_disconnect = 0x7f0a0033;
+		public static final int mr_system_route_name = 0x7f0a0034;
+		public static final int mr_user_route_category_name = 0x7f0a0035;
 	}
 	public static final class style {
 		public static final int TextAppearance_AppCompat_Base_CompactMenu_Dialog = 0x7f0b0002;
