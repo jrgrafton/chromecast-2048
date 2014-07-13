@@ -103,7 +103,7 @@
         android:layout_below="@+id/seekBarLabel"
         android:layout_centerHorizontal="true"
         android:paddingTop="5dp"
-        android:progress="50"
+        android:progress="20"
         android:max="100"/>
 
     <TextView
@@ -115,12 +115,17 @@
         android:layout_centerHorizontal="true"
         android:textColor="#000" />
 
-    <FrameLayout
+    <com.twjg.chromecast2048.views.DragView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_below="@+id/seekBar"
         android:layout_centerHorizontal="true"
-        android:id="@+id/dragArea">
+        android:id="@+id/dragArea"
+        app:exampleDimension="24sp"
+        app:exampleColor="#33b5e5"
+        app:exampleString="Hello, DragView"
+        app:exampleDrawable="@android:drawable/ic_menu_add">
 
         <TextView
             android:layout_width="wrap_content"
@@ -139,6 +144,6 @@
             android:id="@+id/debugText"
             android:layout_gravity="center_horizontal|bottom"
             android:textColor="#000" />
-    </FrameLayout>
+    </com.twjg.chromecast2048.views.DragView>
 
 </RelativeLayout>
