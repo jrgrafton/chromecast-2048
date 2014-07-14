@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.twjg.chromecast2048.views.DragView
+    <com.twjg.chromecast2048.views.DragTriggerView
         android:background="#ccc"
         android:layout_width="300dp"
         android:layout_height="300dp"

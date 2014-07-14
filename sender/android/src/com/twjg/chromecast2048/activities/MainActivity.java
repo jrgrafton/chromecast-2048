@@ -34,11 +34,9 @@ import android.view.Display;
 import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.FrameLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,7 +52,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.twjg.chromecast2048.views.DragView;
+import com.twjg.chromecast2048.views.DragTriggerView;
+import com.twjg.chromecast2048.views.events.DragTriggerEvent;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -76,15 +75,15 @@ public class MainActivity extends ActionBarActivity {
     private Cast.Listener mCastListener;
     private ConnectionCallbacks mConnectionCallbacks;
     private ConnectionFailedListener mConnectionFailedListener;
-    private HelloWorldChannel mHelloWorldChannel;
+    private Chromecast2048Channel mChromecast2048Channel;
     private boolean mApplicationStarted;
     private boolean mWaitingForReconnect;
     private String mSessionId;
 
     // Variables for drag functionality
-    private int dragThreshold;
-    private Point dragStart;
-    private Canvas dragCanvas;
+    private int mDragThreshold;
+    private Point mDragStart;
+    private Canvas mDragCanvas;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,25 +111,24 @@ public class MainActivity extends ActionBarActivity {
         this.attachDragListeners();
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void seekbarUpdated() {
         SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar);
         TextView seekBarValue = (TextView) findViewById(R.id.seekBarValue);
+        DragTriggerView dragArea = (DragTriggerView) findViewById(R.id.dragArea);
 
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
-        display.getSize(size);
-        float width = size.x;
+        float width = display.getWidth();
         float progress = seekbar.getProgress();
-        this.dragThreshold = Math.round(width * (progress / 100.0f));
-        seekBarValue.setText("" + this.dragThreshold + "px");
+        this.mDragThreshold = Math.round(width * (progress / 100.0f));
+        seekBarValue.setText("" + this.mDragThreshold + "px");
+        dragArea.setDragThreshold(this.mDragThreshold);
     }
 
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     private void attachDragListeners() {
         // Capture all UI elements
         SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar);
-        final DragView dragArea = (DragView) findViewById(R.id.dragArea);
+        final DragTriggerView dragArea = (DragTriggerView) findViewById(R.id.dragArea);
 
         // Update seek bar with default values
         this.seekbarUpdated();
@@ -147,13 +145,12 @@ public class MainActivity extends ActionBarActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        // Trigger event if drag has been greater than this.dragThreshold
-        dragArea.setOnDragListener(new View.OnDragListener() {
+        // Attach observer for dragTrigger to dragArea
+        dragArea.setOnDragTriggerListener(new DragTriggerView.OnDragTriggerListener() {
             @Override
-            public boolean onDrag(View view, DragEvent dragEvent) {
-                Log.d(TAG, "" + dragEvent.toString());
-                Log.d(TAG, "[" + dragEvent.getX() + "] [" + dragEvent.getY() + "]");
-                return true;
+            public void onTrigger(DragTriggerEvent e) {
+                Log.d(TAG, "Drag trigger: " + e.getAction());
+                MainActivity.this.sendMessage("" + e.getAction());
             }
         });
     }
@@ -297,8 +294,8 @@ public class MainActivity extends ActionBarActivity {
                         try {
                             Cast.CastApi.setMessageReceivedCallbacks(
                                     mApiClient,
-                                    mHelloWorldChannel.getNamespace(),
-                                    mHelloWorldChannel);
+                                    mChromecast2048Channel.getNamespace(),
+                                    mChromecast2048Channel);
                         } catch (IOException e) {
                             Log.e(TAG, "Exception while creating channel", e);
                         }
@@ -340,23 +337,19 @@ public class MainActivity extends ActionBarActivity {
 
                                                 // Create the custom message
                                                 // channel
-                                                mHelloWorldChannel = new HelloWorldChannel();
+                                                mChromecast2048Channel = new Chromecast2048Channel();
                                                 try {
                                                     Cast.CastApi
                                                             .setMessageReceivedCallbacks(
                                                                     mApiClient,
-                                                                    mHelloWorldChannel
+                                                                    mChromecast2048Channel
                                                                             .getNamespace(),
-                                                                    mHelloWorldChannel);
+                                                                    mChromecast2048Channel);
                                                 } catch (IOException e) {
                                                     Log.e(TAG,
                                                             "Exception while creating channel",
                                                             e);
                                                 }
-
-                                                // set the initial instructions
-                                                // on the receiver
-                                                sendMessage(getString(R.string.instructions));
                                             } else {
                                                 Log.e(TAG,
                                                         "application could not launch");
@@ -400,11 +393,11 @@ public class MainActivity extends ActionBarActivity {
                 if (mApiClient.isConnected()) {
                     try {
                         Cast.CastApi.stopApplication(mApiClient, mSessionId);
-                        if (mHelloWorldChannel != null) {
+                        if (mChromecast2048Channel != null) {
                             Cast.CastApi.removeMessageReceivedCallbacks(
                                     mApiClient,
-                                    mHelloWorldChannel.getNamespace());
-                            mHelloWorldChannel = null;
+                                    mChromecast2048Channel.getNamespace());
+                            mChromecast2048Channel = null;
                         }
                     } catch (IOException e) {
                         Log.e(TAG, "Exception while removing channel", e);
@@ -426,10 +419,10 @@ public class MainActivity extends ActionBarActivity {
      * @param message
      */
     private void sendMessage(String message) {
-        if (mApiClient != null && mHelloWorldChannel != null) {
+        if (mApiClient != null && mChromecast2048Channel != null) {
             try {
                 Cast.CastApi.sendMessage(mApiClient,
-                        mHelloWorldChannel.getNamespace(), message)
+                        mChromecast2048Channel.getNamespace(), message)
                         .setResultCallback(new ResultCallback<Status>() {
                             @Override
                             public void onResult(Status result) {
@@ -441,16 +434,13 @@ public class MainActivity extends ActionBarActivity {
             } catch (Exception e) {
                 Log.e(TAG, "Exception while sending message", e);
             }
-        } else {
-            Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT)
-                    .show();
         }
     }
 
     /**
      * Custom message channel
      */
-    class HelloWorldChannel implements MessageReceivedCallback {
+    class Chromecast2048Channel implements MessageReceivedCallback {
 
         /**
          * @return custom namespace
