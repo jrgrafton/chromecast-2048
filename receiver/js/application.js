@@ -98,7 +98,7 @@ Chromecast2048.prototype.startWebSocketConnection = function(address) {
 
   // Log errors
   this.websocketConnection_.onerror = function(error) {
-    console.log('WebSocket error ' + error);
+    console.log('WebSocket error ' + error.data + " " + error.reason);
   }.bind(this);
 
   this.websocketConnection_.onmessage = function(event) {

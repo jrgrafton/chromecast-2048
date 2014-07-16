@@ -20,8 +20,8 @@ public class WebSocketServer2048 extends WebSocketServer {
     private static final String TAG = MainActivity.class.getSimpleName();
     private WebSocket mClientConnection;
 
-    public WebSocketServer2048() {
-        super(new InetSocketAddress(SOCKET));
+    public WebSocketServer2048(String ip) {
+        super(new InetSocketAddress(ip, SOCKET));
     }
 
     @Override
