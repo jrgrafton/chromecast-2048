@@ -48,7 +48,7 @@ Chromecast2048.prototype.attachMessageChannelToReceiver = function(senderId) {
         var debugString = "message: " + event.message + " from " + this.getSenderId();
         console.log(debugString);
         this.handleMessage(this.getSenderId(), event.message);
-    }.bind(this);
+    }
 
     // Create a special message channel for creating a WS
     var socketMessageChannel = this.socketMessageBus.getCastChannel(senderId);
@@ -56,7 +56,7 @@ Chromecast2048.prototype.attachMessageChannelToReceiver = function(senderId) {
         console.log("Socket channel received message: " + event.message);
         // TODO: Add support for web sockets from multiple clients
         this.startWebSocketConnection(event.message);
-    }
+    }.bind(this);
 }
 
 Chromecast2048.prototype.handleMessage = function(senderId, message) {

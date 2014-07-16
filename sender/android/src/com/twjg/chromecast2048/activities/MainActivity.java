@@ -360,7 +360,7 @@ public class MainActivity extends ActionBarActivity {
                                                 }
 
                                                 // Create the socket custom message channel
-                                                mChromecast2048ChannelSocket = new Chromecast2048Channel(getString(R.string.namespace_game));
+                                                mChromecast2048ChannelSocket = new Chromecast2048Channel(getString(R.string.namespace_socket));
                                                 try {
                                                     Cast.CastApi
                                                             .setMessageReceivedCallbacks(
