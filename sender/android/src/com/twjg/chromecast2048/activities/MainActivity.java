@@ -16,11 +16,10 @@
 
 package com.twjg.chromecast2048.activities;
 
-import android.annotation.TargetApi;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
@@ -29,9 +28,9 @@ import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.media.MediaRouter.RouteInfo;
+import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Display;
-import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,7 +38,6 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.twjg.chromecast2048.R;
 import com.google.android.gms.cast.ApplicationMetadata;
@@ -54,6 +52,7 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.twjg.chromecast2048.views.DragTriggerView;
 import com.twjg.chromecast2048.views.events.DragTriggerEvent;
+import com.twjg.chromecast2048.websocket.WebSocketServer2048;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -75,15 +74,21 @@ public class MainActivity extends ActionBarActivity {
     private Cast.Listener mCastListener;
     private ConnectionCallbacks mConnectionCallbacks;
     private ConnectionFailedListener mConnectionFailedListener;
-    private Chromecast2048Channel mChromecast2048Channel;
     private boolean mApplicationStarted;
     private boolean mWaitingForReconnect;
     private String mSessionId;
+
+    // Custom message channels
+    private Chromecast2048Channel mChromecast2048ChannelGame;
 
     // Variables for drag functionality
     private int mDragThreshold;
     private Point mDragStart;
     private Canvas mDragCanvas;
+
+    // Raw websocket functionality
+    private WebSocketServer2048 mWebSocketServer2048;
+    private Chromecast2048Channel mChromecast2048ChannelSocket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +106,9 @@ public class MainActivity extends ActionBarActivity {
                         CastMediaControlIntent.categoryForCast(getResources()
                                 .getString(R.string.app_id))).build();
         mMediaRouterCallback = new MyMediaRouterCallback();
+
+        // Create new WebSocketServer
+        this.mWebSocketServer2048 = new WebSocketServer2048();
 
         // Attach button listeners
         this.attachObservers();
@@ -150,7 +158,7 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onTrigger(DragTriggerEvent e) {
                 Log.d(TAG, "Drag trigger: " + e.getAction());
-                MainActivity.this.sendMessage("" + e.getAction());
+                MainActivity.this.sendMessage("" + e.getAction(), MainActivity.this.mChromecast2048ChannelGame);
             }
         });
     }
@@ -170,7 +178,7 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     Button button = (Button) v;
-                    MainActivity.this.sendMessage((String) button.getHint());
+                    MainActivity.this.sendMessage((String) button.getHint(), MainActivity.this.mChromecast2048ChannelGame);
                 }
             });
         }
@@ -294,8 +302,8 @@ public class MainActivity extends ActionBarActivity {
                         try {
                             Cast.CastApi.setMessageReceivedCallbacks(
                                     mApiClient,
-                                    mChromecast2048Channel.getNamespace(),
-                                    mChromecast2048Channel);
+                                    mChromecast2048ChannelGame.getNamespace(),
+                                    mChromecast2048ChannelGame);
                         } catch (IOException e) {
                             Log.e(TAG, "Exception while creating channel", e);
                         }
@@ -335,19 +343,40 @@ public class MainActivity extends ActionBarActivity {
                                                                 + wasLaunched);
                                                 mApplicationStarted = true;
 
-                                                // Create the custom message
-                                                // channel
-                                                mChromecast2048Channel = new Chromecast2048Channel();
+                                                // Create the game custom message channel
+                                                mChromecast2048ChannelGame = new Chromecast2048Channel(getString(R.string.namespace_game));
                                                 try {
                                                     Cast.CastApi
                                                             .setMessageReceivedCallbacks(
                                                                     mApiClient,
-                                                                    mChromecast2048Channel
+                                                                    mChromecast2048ChannelGame
                                                                             .getNamespace(),
-                                                                    mChromecast2048Channel);
+                                                                    mChromecast2048ChannelGame
+                                                            );
                                                 } catch (IOException e) {
                                                     Log.e(TAG,
-                                                            "Exception while creating channel",
+                                                            "Exception while creating game channel",
+                                                            e);
+                                                }
+
+                                                // Create the socket custom message channel
+                                                mChromecast2048ChannelSocket = new Chromecast2048Channel(getString(R.string.namespace_game));
+                                                try {
+                                                    Cast.CastApi
+                                                            .setMessageReceivedCallbacks(
+                                                                    mApiClient,
+                                                                    mChromecast2048ChannelSocket
+                                                                            .getNamespace(),
+                                                                    mChromecast2048ChannelSocket
+                                                            );
+                                                    // Send message with IP and PORT to trigger socketConnection back to server
+                                                    WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+                                                    String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+                                                    MainActivity.this.sendMessage(ip + ":" + WebSocketServer2048.SOCKET
+                                                            , MainActivity.this.mChromecast2048ChannelSocket);
+                                                } catch (IOException e) {
+                                                    Log.e(TAG,
+                                                            "Exception while creating socket channel",
                                                             e);
                                                 }
                                             } else {
@@ -393,11 +422,11 @@ public class MainActivity extends ActionBarActivity {
                 if (mApiClient.isConnected()) {
                     try {
                         Cast.CastApi.stopApplication(mApiClient, mSessionId);
-                        if (mChromecast2048Channel != null) {
+                        if (mChromecast2048ChannelGame != null) {
                             Cast.CastApi.removeMessageReceivedCallbacks(
                                     mApiClient,
-                                    mChromecast2048Channel.getNamespace());
-                            mChromecast2048Channel = null;
+                                    mChromecast2048ChannelGame.getNamespace());
+                            mChromecast2048ChannelGame = null;
                         }
                     } catch (IOException e) {
                         Log.e(TAG, "Exception while removing channel", e);
@@ -418,11 +447,11 @@ public class MainActivity extends ActionBarActivity {
      *
      * @param message
      */
-    private void sendMessage(String message) {
-        if (mApiClient != null && mChromecast2048Channel != null) {
+    private void sendMessage(String message, Chromecast2048Channel channel) {
+        if (mApiClient != null && channel != null) {
             try {
                 Cast.CastApi.sendMessage(mApiClient,
-                        mChromecast2048Channel.getNamespace(), message)
+                        channel.getNamespace(), message)
                         .setResultCallback(new ResultCallback<Status>() {
                             @Override
                             public void onResult(Status result) {
@@ -438,15 +467,25 @@ public class MainActivity extends ActionBarActivity {
     }
 
     /**
+     * Connect to raw Websocket on
+     */
+
+    /**
      * Custom message channel
      */
     class Chromecast2048Channel implements MessageReceivedCallback {
+
+        private String mNamespace;
+
+        public Chromecast2048Channel(String namespace) {
+            this.mNamespace = namespace;
+        }
 
         /**
          * @return custom namespace
          */
         public String getNamespace() {
-            return getString(R.string.namespace);
+            return this.mNamespace;
         }
 
         /*
