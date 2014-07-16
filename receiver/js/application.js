@@ -24,7 +24,8 @@ Chromecast2048.prototype.startReceiverManager = function() {
 
 Chromecast2048.prototype.setupReceiverManager = function() {
     this.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
-    this.customMessageBus = this.castReceiverManager.getCastMessageBus('urn:x-cast:com.twjg.chromecast2048');
+    this.gameMessageBus = this.castReceiverManager.getCastMessageBus('urn:x-cast:com.twjg.chromecast2048');
+    this.socketMessageBus = this.castReceiverManager.getCastMessageBus('urn:x-cast:com.twjg.chromecast2048.websocket');
 
     this.castReceiverManager.onSenderConnected = function(event) {
         console.log("Sender connected: " + event.senderId);
@@ -41,17 +42,17 @@ Chromecast2048.prototype.setupReceiverManager = function() {
 }
 
 Chromecast2048.prototype.attachMessageChannelToReceiver = function(senderId) {
-    console.log("Requesting socket for: " + senderId);
-    var messageChannel = this.customMessageBus.getCastChannel(senderId);
-    messageChannel.onMessage = function(event) {
+    console.log("Requesting channels for: " + senderId);
+    var gameMessageChannel = this.gameMessageBus.getCastChannel(senderId);
+    gameMessageChannel.onMessage = function(event) {
         var debugString = "message: " + event.message + " from " + this.getSenderId();
         console.log(debugString);
         this.handleMessage(this.getSenderId(), event.message);
     }.bind(this);
 
     // Create a special message channel for creating a WS
-    var socketSetupChannel = this.castReceiverManager.getCastMessageBus('urn:x-cast:com.twjg.chromecast2048.websocket');
-    socketSetupChannel.onMessage = function(event) {
+    var socketMessageChannel = this.socketMessageBus.getCastChannel(senderId);
+    socketMessageChannel.onMessage = function(event) {
         console.log("Socket channel received message: " + event.message);
         // TODO: Add support for web sockets from multiple clients
         this.startWebSocketConnection(event.message);
