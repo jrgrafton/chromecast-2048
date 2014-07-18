@@ -107,10 +107,9 @@ public class MainActivity extends ActionBarActivity {
                                 .getString(R.string.app_id))).build();
         mMediaRouterCallback = new MyMediaRouterCallback();
 
-        // Create new WebSocketServer
-        WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
-        String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-        this.mWebSocketServer2048 = new WebSocketServer2048(ip);
+        // Start socket server
+        this.mWebSocketServer2048 = new WebSocketServer2048();
+        this.mWebSocketServer2048.start();
 
         // Attach button listeners
         this.attachObservers();
