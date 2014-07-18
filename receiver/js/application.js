@@ -88,7 +88,7 @@ Chromecast2048.prototype.startGame = function() {
 Chromecast2048.prototype.startWebSocketConnection = function(address) {
   console.log("Connecting web socket to: " + address);
 
-  this.websocketConnection_ = new WebSocket('ws:/' + address);
+  this.websocketConnection_ = new WebSocket('ws://' + address);
 
   // When the connection is open, send some data to the server
   this.websocketConnection_.onopen = function() {
