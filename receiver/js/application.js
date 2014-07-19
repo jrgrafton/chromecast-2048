@@ -44,10 +44,11 @@ Chromecast2048.prototype.setupReceiverManager = function() {
 Chromecast2048.prototype.attachMessageChannelToReceiver = function(senderId) {
     console.log("Requesting channels for: " + senderId);
     var gameMessageChannel = this.gameMessageBus.getCastChannel(senderId);
+    var that = this;
     gameMessageChannel.onMessage = function(event) {
         var debugString = "message: " + event.message + " from " + this.getSenderId();
         console.log(debugString);
-        this.handleMessage(this.getSenderId(), event.message);
+        that.handleMessage(this.getSenderId(), event.message);
     }
 
     // Create a special message channel for creating a WS
