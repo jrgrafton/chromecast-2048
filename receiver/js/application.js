@@ -102,6 +102,6 @@ Chromecast2048.prototype.startWebSocketConnection = function(address) {
   }.bind(this);
 
   this.websocketConnection_.onmessage = function(event) {
-    this.handleMessage(event.data);
+    this.handleMessage("", event.data);
   }.bind(this);
 };

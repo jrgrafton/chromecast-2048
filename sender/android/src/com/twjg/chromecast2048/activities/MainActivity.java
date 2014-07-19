@@ -159,7 +159,8 @@ public class MainActivity extends ActionBarActivity {
             @Override
             public void onTrigger(DragTriggerEvent e) {
                 Log.d(TAG, "Drag trigger: " + e.getAction());
-                MainActivity.this.sendMessage("" + e.getAction(), MainActivity.this.mChromecast2048ChannelGame);
+                MainActivity.this.sendMessage("" + e.getAction(),
+                        MainActivity.this.mChromecast2048ChannelGame, true);
             }
         });
     }
@@ -179,7 +180,8 @@ public class MainActivity extends ActionBarActivity {
                 @Override
                 public void onClick(View v) {
                     Button button = (Button) v;
-                    MainActivity.this.sendMessage((String) button.getHint(), MainActivity.this.mChromecast2048ChannelGame);
+                    MainActivity.this.sendMessage((String) button.getHint(),
+                            MainActivity.this.mChromecast2048ChannelGame, true);
                 }
             });
         }
@@ -374,7 +376,7 @@ public class MainActivity extends ActionBarActivity {
                                                     WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
                                                     String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
                                                     MainActivity.this.sendMessage(ip + ":" + WebSocketServer2048.SOCKET
-                                                            , MainActivity.this.mChromecast2048ChannelSocket);
+                                                            , MainActivity.this.mChromecast2048ChannelSocket, false);
                                                 } catch (IOException e) {
                                                     Log.e(TAG,
                                                             "Exception while creating socket channel",
@@ -448,19 +450,23 @@ public class MainActivity extends ActionBarActivity {
      *
      * @param message
      */
-    private void sendMessage(String message, Chromecast2048Channel channel) {
+    private void sendMessage(String message, Chromecast2048Channel channel, Boolean useSocket) {
         if (mApiClient != null && channel != null) {
             try {
-                Cast.CastApi.sendMessage(mApiClient,
-                        channel.getNamespace(), message)
-                        .setResultCallback(new ResultCallback<Status>() {
-                            @Override
-                            public void onResult(Status result) {
-                                if (!result.isSuccess()) {
-                                    Log.e(TAG, "Sending message failed");
+                if(useSocket) {
+                    this.mWebSocketServer2048.sendMessage(message);
+                } else {
+                    Cast.CastApi.sendMessage(mApiClient,
+                            channel.getNamespace(), message)
+                            .setResultCallback(new ResultCallback<Status>() {
+                                @Override
+                                public void onResult(Status result) {
+                                    if (!result.isSuccess()) {
+                                        Log.e(TAG, "Sending message failed");
+                                    }
                                 }
-                            }
-                        });
+                            });
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Exception while sending message", e);
             }
