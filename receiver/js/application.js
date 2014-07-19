@@ -61,12 +61,12 @@ Chromecast2048.prototype.attachMessageChannelToReceiver = function(senderId) {
 
 Chromecast2048.prototype.handleMessage = function(senderId, message) {
     console.log("Handling message: " + message)
-    switch (event.message) {
+    switch (message) {
         case "0" :
         case "1" :
         case "2" :
         case "3" :
-            window.game.move(event.message);
+            window.game.move(message);
             break;
         case "4" :
             window.game.restart();
