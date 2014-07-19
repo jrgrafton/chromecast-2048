@@ -36,6 +36,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -89,6 +91,7 @@ public class MainActivity extends ActionBarActivity {
     // Raw websocket functionality
     private WebSocketServer2048 mWebSocketServer2048;
     private Chromecast2048Channel mChromecast2048ChannelSocket;
+    private boolean mWebSocketEnabled;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,28 +113,17 @@ public class MainActivity extends ActionBarActivity {
         // Start socket server
         this.mWebSocketServer2048 = new WebSocketServer2048();
         this.mWebSocketServer2048.start();
+        this.mWebSocketEnabled = false;
 
         // Attach button listeners
         this.attachObservers();
     }
 
     private void attachObservers() {
-        this.attachButtonListeners();
         this.attachDragListeners();
-    }
-
-    private void seekbarUpdated() {
-        SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar);
-        TextView seekBarValue = (TextView) findViewById(R.id.seekBarValue);
-        DragTriggerView dragArea = (DragTriggerView) findViewById(R.id.dragArea);
-
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        float width = display.getWidth();
-        float progress = seekbar.getProgress();
-        this.mDragThreshold = Math.round(width * (progress / 100.0f));
-        seekBarValue.setText("" + this.mDragThreshold + "px");
-        dragArea.setDragThreshold(this.mDragThreshold);
+        this.attachButtonListeners();
+        this.attachCheckboxListeners();
+        //webSocketDisabled
     }
 
     private void attachDragListeners() {
@@ -164,6 +156,21 @@ public class MainActivity extends ActionBarActivity {
             }
         });
     }
+
+    private void seekbarUpdated() {
+        SeekBar seekbar = (SeekBar) findViewById(R.id.seekBar);
+        TextView seekBarValue = (TextView) findViewById(R.id.seekBarValue);
+        DragTriggerView dragArea = (DragTriggerView) findViewById(R.id.dragArea);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        float width = display.getWidth();
+        float progress = seekbar.getProgress();
+        this.mDragThreshold = Math.round(width * (progress / 100.0f));
+        seekBarValue.setText("" + this.mDragThreshold + "px");
+        dragArea.setDragThreshold(this.mDragThreshold);
+    }
+
     /**
      * Sends commands over to Chromecast
      */
@@ -185,6 +192,16 @@ public class MainActivity extends ActionBarActivity {
                 }
             });
         }
+    }
+
+    private void attachCheckboxListeners() {
+        CheckBox webSocketCheckbox = (CheckBox) findViewById(R.id.webSocketDisabled);
+        webSocketCheckbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                MainActivity.this.mWebSocketEnabled = isChecked;
+            }
+        });
     }
 
     @Override
@@ -453,7 +470,7 @@ public class MainActivity extends ActionBarActivity {
     private void sendMessage(String message, Chromecast2048Channel channel, Boolean useSocket) {
         if (mApiClient != null && channel != null) {
             try {
-                if(useSocket) {
+                if(useSocket && this.mWebSocketEnabled) {
                     this.mWebSocketServer2048.sendMessage(message);
                 } else {
                     Cast.CastApi.sendMessage(mApiClient,

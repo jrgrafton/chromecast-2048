@@ -85,25 +85,50 @@
         android:layout_centerHorizontal="true"
         android:hint="4" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/seekBarLabel"
-        android:text="@string/seekbar_label"
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:id="@+id/labels"
         android:layout_below="@+id/resetButton"
-        android:layout_centerHorizontal="true"
-        android:paddingTop="20dp"
-        android:textColor="#000" />
+        android:weightSum="1"
+        android:paddingTop="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/seekBarLabel"
+            android:text="@string/seekbar_label"
+            android:textColor="#000"
+            android:textSize="12.5dp"
+            android:layout_gravity="left|center"
+            android:gravity="left|center"
+            android:layout_weight="0.71" />
+
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Enable WebSocket"
+            android:id="@+id/webSocketDisabled"
+            android:layout_gravity="right|center"
+            android:gravity="center"
+            android:checked="false"
+            android:textColor="#000"
+            android:textSize="12.5dp" />
+    </LinearLayout>
+
+
+
 
     <SeekBar
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/seekBar"
-        android:layout_below="@+id/seekBarLabel"
-        android:layout_centerHorizontal="true"
-        android:paddingTop="5dp"
-        android:progress="20"
+        android:layout_below="@+id/labels"
+        android:progress="4"
         android:max="100"/>
 
     <TextView
@@ -113,7 +138,8 @@
         android:id="@+id/seekBarValue"
         android:layout_below="@+id/seekBar"
         android:layout_centerHorizontal="true"
-        android:textColor="#000" />
+        android:textColor="#000"
+        android:textSize="12.5dp"/>
 
     <FrameLayout
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -138,12 +164,15 @@
             android:text="[up: 0] [right: 0] [down: 0] [left: 0]"
             android:id="@+id/debugText"
             android:layout_gravity="center_horizontal|bottom"
-            android:textColor="#000" />
+            android:textColor="#000"
+            android:textSize="12.5dp"/>
 
         <com.twjg.chromecast2048.views.DragTriggerView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/dragArea">
         </com.twjg.chromecast2048.views.DragTriggerView>
+
     </FrameLayout>
+
 </RelativeLayout>
