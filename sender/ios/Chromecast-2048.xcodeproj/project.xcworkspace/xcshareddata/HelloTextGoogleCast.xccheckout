@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>18BD93C9-65E1-4FBC-A707-F4F7B23DBBA5</string>
+	<key>IDESourceControlProjectName</key>
+	<string>HelloTextGoogleCast</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>045B8222-D941-40AB-A5E9-2C5355BE6C4E</key>
+		<string>https://github.com/jrgrafton/chromecast-2048.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>sender/ios/HelloTextGoogleCast.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>045B8222-D941-40AB-A5E9-2C5355BE6C4E</key>
+		<string>../../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/jrgrafton/chromecast-2048.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>045B8222-D941-40AB-A5E9-2C5355BE6C4E</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>045B8222-D941-40AB-A5E9-2C5355BE6C4E</string>
+			<key>IDESourceControlWCCName</key>
+			<string>chromecast-2048</string>
+		</dict>
+	</array>
+</dict>
+</plist>

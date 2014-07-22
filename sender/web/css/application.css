@@ -1,0 +1,8 @@
+html, body {
+    height: 100%;
+}
+
+.touch .hidden-touch,
+.no-touch .visible-touch {
+    display: none;
+}

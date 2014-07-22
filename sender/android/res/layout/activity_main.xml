@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     Copyright (C) 2014 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity" >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/app_name"
+        android:id="@+id/textView"
+        android:textSize="30sp"
+        android:textColor="#000"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentStart="true"
+        android:gravity="center_horizontal"
+        android:paddingTop="10dp"
+        android:id="@+id/buttonsView">
+
+        <Button
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="@string/up_button_title"
+            android:id="@+id/upButton"
+            android:hint="0" />
+
+        <Button
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="@string/right_button_title"
+            android:id="@+id/rightButton"
+            android:hint="1" />
+
+        <Button
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="@string/down_button_title"
+            android:id="@+id/downButton"
+            android:hint="2" />
+
+        <Button
+            android:layout_width="80dp"
+            android:layout_height="wrap_content"
+            android:text="@string/left_button_title"
+            android:id="@+id/leftButton"
+            android:hint="3" />
+    </LinearLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/restart_button_title"
+        android:id="@+id/resetButton"
+        android:layout_below="@+id/buttonsView"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:hint="4" />
+
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:id="@+id/labels"
+        android:layout_below="@+id/resetButton"
+        android:weightSum="1"
+        android:paddingTop="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/seekBarLabel"
+            android:text="@string/seekbar_label"
+            android:textColor="#000"
+            android:textSize="12.5dp"
+            android:layout_gravity="left|center"
+            android:gravity="left|center"
+            android:layout_weight="0.71" />
+
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Enable WebSocket"
+            android:id="@+id/webSocketDisabled"
+            android:layout_gravity="right|center"
+            android:gravity="center"
+            android:checked="false"
+            android:textColor="#000"
+            android:textSize="12.5dp" />
+    </LinearLayout>
+
+
+
+
+    <SeekBar
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/seekBar"
+        android:layout_below="@+id/labels"
+        android:progress="4"
+        android:max="100"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/seekBarValue"
+        android:layout_below="@+id/seekBar"
+        android:layout_centerHorizontal="true"
+        android:textColor="#000"
+        android:textSize="12.5dp"/>
+
+    <FrameLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/seekBar"
+        android:layout_centerHorizontal="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="@string/drag_area_label"
+            android:id="@+id/dragAreaLabel"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textAlignment="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="[up: 0] [right: 0] [down: 0] [left: 0]"
+            android:id="@+id/debugText"
+            android:layout_gravity="center_horizontal|bottom"
+            android:textColor="#000"
+            android:textSize="12.5dp"/>
+
+        <com.twjg.chromecast2048.views.DragTriggerView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/dragArea">
+        </com.twjg.chromecast2048.views.DragTriggerView>
+
+    </FrameLayout>
+
+</RelativeLayout>
