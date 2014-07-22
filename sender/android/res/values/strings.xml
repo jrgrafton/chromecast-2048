@@ -17,7 +17,7 @@
 <resources>
 
     <string name="app_name">Chromecast2048</string>
-    <string name="app_id">33AA2579</string>
+    <string name="app_id">16DBE624</string>
     <string name="namespace_game">urn:x-cast:com.twjg.chromecast2048</string>
     <string name="namespace_socket">urn:x-cast:com.twjg.chromecast2048.websocket</string>
     <string name="action_settings">Settings</string>
