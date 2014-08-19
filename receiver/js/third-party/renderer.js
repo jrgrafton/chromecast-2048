@@ -63,7 +63,7 @@ Renderer.prototype.onRender_ = function() {
 }
 
 Renderer.prototype.loadAssets_ = function(onCompleteCallback) {
-  console.debug("renderer.js: loadAssets_({0})".format(canvas));
+  console.debug("renderer.js: loadAssets_({0})");
 	loader = new PIXI.AssetLoader(this.assetList);
 	loader.onComplete = onCompleteCallback
 	loader.load();

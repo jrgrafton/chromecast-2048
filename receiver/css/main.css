@@ -115,9 +115,10 @@ hr {
   margin-bottom: 30px; }
 
 .container {
-  width: 500px;
+  width: 1216px;
   height: 700px;
-  margin: 0 auto; }
+  margin: 0 auto;
+}
 
 .game-container {
   margin-top: 40px;
@@ -176,6 +177,8 @@ hr {
   background-color: #faf8ef;
   width: 500px;
   height: 500px;
+  float: left;
+  margin-left: 2em;
 }
 .rendererView {
   width: 500px;

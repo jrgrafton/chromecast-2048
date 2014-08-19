@@ -9,7 +9,8 @@ window.onload = function() {
 	}
 
 	// Create a 2048 Game instance
-	window.boardOne = new GameManager(document.getElementById("canvas"), 4);
+	window.boardOne = new GameManager(document.getElementById("player1"), 4);
+	window.boardTwo = new GameManager(document.getElementById("player2"), 4);
 
 	// Load tests or receiver code depending on environment
 	if(navigator.userAgent.indexOf("armv7l") === -1) {

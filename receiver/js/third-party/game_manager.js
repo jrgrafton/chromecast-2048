@@ -10,6 +10,8 @@ function GameManager(canvas, size) {
   this.keepPlaying    = false;
   this.storedMove     = null;
 
+  console.log(canvas);
+
   // Create game renderer
   this.renderer = new Renderer(canvas, this.update.bind(this), function() {
     // Finish initialisation once renderer is ready
