@@ -1,125 +1,48 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black">
-    <meta name="HandheldFriendly" content="True">
-    <meta name="MobileOptimized" content="320">
-    <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1, user-scalable=no, minimal-ui">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta charset="utf-8">
+        <title>Chromecast: 2048</title>
+        <link href="css/main.css" rel="stylesheet" type="text/css">
+    </head>
 
-    <title>Chromecast: 2048</title>
-
-    <link href="style/main.css" rel="stylesheet" type="text/css">
-    <link rel="shortcut icon" href="favicon.ico">
-    <link rel="apple-touch-icon" href="meta/apple-touch-icon.png">
-    <link rel="apple-touch-startup-image" href="meta/apple-touch-startup-image-640x1096.png" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)"><!-- iPhone 5+ -->
-    <link rel="apple-touch-startup-image" href="meta/apple-touch-startup-image-640x920.png" media="(device-width: 320px) and (device-height: 480px) and (-webkit-device-pixel-ratio: 2)"><!-- iPhone, retina -->
-</head>
-
-<body>
-    <style>
-        #debug-text {
-            position:fixed;
-            max-height: 100%;
-            overflow: auto;
-            top:0;
-            left:0;
-            padding:10px;
-            background:rgba(0,0,0,0.5);
-            color:#fff;
-            font-family: "Courier New", monospace;
-            display: none;
-        }
-    </style>
-    <span id="debug-text">Debug text</span>
-    <div class="container">
-        <div class="heading">
-            <h1 class="title">2048</h1>
-
-            <div class="scores-container">
-                <div class="score-container">
-                    0
-                </div>
-
-                <div class="best-container">
-                    0
-                </div>
-            </div>
-        </div>
-
-        <div class="above-game">
-            <p class="game-intro">Join the numbers and get to the <strong>2048 tile!</strong></p><a class="restart-button">New Game</a>
-        </div>
-
-        <div class="game-container">
-            <div class="game-message">
-                <p></p>
-
-                <div class="lower">
-                    <a class="keep-playing-button">Keep going</a> <a class="retry-button">Try again</a>
+    <body>
+        <div class="container">
+            <div class="heading">
+                <h1 class="title">2048</h1>
+                <div class="scores-container">
+                    <div class="score-container">0</div>
+                    <div class="best-container">0</div>
                 </div>
             </div>
 
-            <div class="grid-container">
-                <div class="grid-row">
-                    <div class="grid-cell"></div>
-
-                    <div class="grid-cell"></div>
-
-                    <div class="grid-cell"></div>
-
-                    <div class="grid-cell"></div>
-                </div>
-
-                <div class="grid-row">
-                    <div class="grid-cell"></div>
-
-                    <div class="grid-cell"></div>
-
-                    <div class="grid-cell"></div>
-
-                    <div class="grid-cell"></div>
-                </div>
-
-                <div class="grid-row">
-                    <div class="grid-cell"></div>
-
-                    <div class="grid-cell"></div>
-
-                    <div class="grid-cell"></div>
-
-                    <div class="grid-cell"></div>
-                </div>
-
-                <div class="grid-row">
-                    <div class="grid-cell"></div>
-
-                    <div class="grid-cell"></div>
-
-                    <div class="grid-cell"></div>
-
-                    <div class="grid-cell"></div>
-                </div>
+            <div class="above-game">
+                <p class="game-intro">Join the numbers and get to the <strong>2048 tile!</strong></p>
             </div>
-
-            <div class="tile-container"></div>
+            <div class="canvasContainer">
+                <canvas id="player1" class="rendererView" width="500" height="500"></canvas>
+            </div>
+            <div class="canvasContainer">
+                <canvas id="player2" class="rendererView" width="500" height="500"></canvas>
+            </div>
+            <p style="display:none"><small>Created by <a href="http://gabrielecirulli.com/" target="_blank">Gabriele Cirulli.</a> Based on <a href="https://itunes.apple.com/us/app/1024!/id823499224" target="_blank">1024 by Veewo Studio</a> and conceptually similar to <a href="http://asherv.com/threes/" target="_blank">Threes by Asher Vollmer.</a></small></p>
         </div>
+        
 
-        <p style="display:none"><small>Created by <a href="http://gabrielecirulli.com" target="_blank">Gabriele Cirulli.</a> Based on <a href="https://itunes.apple.com/us/app/1024!/id823499224" target="_blank">1024 by Veewo Studio</a> and conceptually similar to <a href="http://asherv.com/threes/" target="_blank">Threes by Asher Vollmer.</a></small></p>
-    </div>
-    
-    <script src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
-    <script src="js/bind_polyfill.js" type="text/javascript"></script>
-	<script src="js/classlist_polyfill.js" type="text/javascript"></script>
-	<script src="js/animframe_polyfill.js" type="text/javascript"></script>
-	<script src="js/keyboard_input_manager.js" type="text/javascript"></script>
-	<script src="js/html_actuator.js" type="text/javascript"></script>
-	<script src="js/grid.js" type="text/javascript"></script>
-	<script src="js/tile.js" type="text/javascript"></script>
-	<script src="js/local_storage_manager.js" type="text/javascript"></script>
-	<script src="js/game_manager.js" type="text/javascript"></script>
-    <!-- @TODO Refactor into various components and create loose coupling between CC and 2048 libs -->
-	<script src="js/application.js" type="text/javascript"></script>
-</body>
+        <!-- Chromecast remote libraries -->
+        <script src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
+
+        <script src="js/main.js"></script>
+        <script src="js/CustomReceiver.js"></script>
+        <script src="js/Utils.js"></script>
+
+        <!-- Third party (2048 game code) -->
+    	<script src="js/third-party/pixi.js"></script>
+        <script src="js/third-party/keyboard_input_manager.js"></script>
+        <script src="js/third-party/tile.js"></script>
+        <script src="js/third-party/grid.js"></script>
+        <script src="js/third-party/renderer.js"></script>
+        <script src="js/third-party/game_manager.js"></script>
+    </body>
 </html>
