@@ -7,34 +7,65 @@
         <link href="css/main.css" rel="stylesheet" type="text/css">
     </head>
 
-    <body>
-        <div class="container">
-            <div class="heading">
-                <h1 class="title">2048</h1>
-                <div class="scores-container">
-                    <div class="score-container">0</div>
-                    <div class="best-container">0</div>
+    <body class="loading">
+        <section class="loading">
+            <h1>Loading state</h1>
+            <div>Loading...</div>
+        </section>
+        <section class="lobby">
+            <h1 class="message">Waiting for players to join</h1>
+            <h1 class="countdown"></h1>
+            <div class="player" data-player-index="0">
+                <img src="http://placehold.it/150/150">
+                <div class="name">Waiting for player...</div>
+            </div>
+            <div class="player" data-player-index="1">
+                <img src="http://placehold.it/150/150">
+                <div class="name">Waiting for player...</div>
+            </div>
+        </section>
+        <section class="in-game">
+            <div class="container">
+                <div class="heading">
+                    <h1 class="title">2048</h1>
+                    <div class="scores-container">
+                        <div class="score-container" data-player-index="0">
+                            0
+                        </div>
+                        <div class="score-container" data-player-index="1">
+                            0
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="above-game">
-                <p class="game-intro">Join the numbers and get to the <strong>2048 tile!</strong></p>
+                <div class="above-game">
+                    <p class="game-intro">Join the numbers and get to the <strong>2048 tile!</strong></p>
+                </div>
+                <div class="canvasContainer">
+                    <canvas id="player1" class="rendererView" width="500" height="500"></canvas>
+                </div>
+                <div class="canvasContainer">
+                    <canvas id="player2" class="rendererView" width="500" height="500"></canvas>
+                </div>
+                <p style="display:none"><small>Created by <a href="http://gabrielecirulli.com/" target="_blank">Gabriele Cirulli.</a> Based on <a href="https://itunes.apple.com/us/app/1024!/id823499224" target="_blank">1024 by Veewo Studio</a> and conceptually similar to <a href="http://asherv.com/threes/" target="_blank">Threes by Asher Vollmer.</a></small></p>
             </div>
-            <div class="canvasContainer">
-                <canvas id="player1" class="rendererView" width="500" height="500"></canvas>
-            </div>
-            <div class="canvasContainer">
-                <canvas id="player2" class="rendererView" width="500" height="500"></canvas>
-            </div>
-            <p style="display:none"><small>Created by <a href="http://gabrielecirulli.com/" target="_blank">Gabriele Cirulli.</a> Based on <a href="https://itunes.apple.com/us/app/1024!/id823499224" target="_blank">1024 by Veewo Studio</a> and conceptually similar to <a href="http://asherv.com/threes/" target="_blank">Threes by Asher Vollmer.</a></small></p>
-        </div>
-        
+        </section>
+        <section class="paused">
+            <h1>Pause state</h1>
+            <div class="reason">??</div>
+        </section>
+        <section class="results">
+            <h1>Results state</h1>
+            <div class="message">Tap rematch to start a new game</div>
+            <h1 class="result" data-player-index="0"></h1>
+            <h1 class="result" data-player-index="1"></h2>
+        </section>
+
 
         <!-- Chromecast remote libraries -->
         <script src="//www.gstatic.com/cast/sdk/libs/receiver/2.0.0/cast_receiver.js"></script>
 
-        <script src="js/main.js"></script>
-        <script src="js/CustomReceiver.js"></script>
+        <!-- Universal util functions -->
         <script src="js/Utils.js"></script>
 
         <!-- Third party (2048 game code) -->
@@ -44,5 +75,12 @@
         <script src="js/third-party/grid.js"></script>
         <script src="js/third-party/renderer.js"></script>
         <script src="js/third-party/game_manager.js"></script>
+
+        <!-- Chromecast game code -->
+        <script src="js/UI.js"></script>
+        <script src="js/EventBroker.js"></script>
+        <script src="js/CustomReceiver.js"></script>
+        <script src="js/tests/E2ETests.js"></script>
+        <script src="js/main.js"></script>
     </body>
 </html>
