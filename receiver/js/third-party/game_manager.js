@@ -9,6 +9,7 @@ function GameManager(canvas, size) {
   this.won            = false;
   this.keepPlaying    = false;
   this.storedMove     = null;
+  this.events         = {};
 
   // Create game renderer
   this.renderer = new Renderer(canvas, this.update.bind(this), function() {
@@ -22,6 +23,22 @@ function GameManager(canvas, size) {
     this.inputManager.on("move", this.move.bind(this));
   }.bind(this));
 }
+
+GameManager.prototype.on = function (event, callback) {
+  if (!this.events[event]) {
+    this.events[event] = [];
+  }
+  this.events[event].push(callback);
+};
+
+GameManager.prototype.emit = function (event, data) {
+  var callbacks = this.events[event];
+  if (callbacks) {
+    callbacks.forEach(function (callback) {
+      callback(data);
+    });
+  }
+};
 
 // Restart the game
 GameManager.prototype.restart = function () {
@@ -122,12 +139,24 @@ GameManager.prototype.move = function (direction) {
 
           // Update the score
           self.score += merged.value;
+          self.emit("game-did-score", {
+            "detail" : {
+              "score": self.score
+            }
+          });
 
           // Show merged tile
           merged.show();
 
           // The mighty 2048 tile
-          if (merged.value === 2048) self.won = true;
+          if (merged.value === 2048) { 
+            self.won = true;
+            self.emit("game-did-end", {
+              "detail" : {
+                "reason": "2048"
+              }
+            })
+          }
         } else {
           self.moveTile(tile, positions.farthest);
         }
@@ -144,6 +173,12 @@ GameManager.prototype.move = function (direction) {
 
     if (!this.movesAvailable()) {
       this.over = true; // Game over!
+      // Dispatch event
+      self.emit("game-did-end", {
+        "detail" : {
+          "reason": "out of moves"
+        }
+      })
     }
 
     this.grid.updateTileSprites();

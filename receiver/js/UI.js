@@ -41,7 +41,7 @@ UI.prototype.setLobbyMessage = function(message) {
 
 UI.prototype.setCountdownNumber = function(number) {
 	console.debug("UI.js: setCountdownNumber({0})".format(number));
-	document.querySelector("section.lobby .countdown").innerHTML = message;
+	document.querySelector("section.lobby .countdown").innerHTML = number;
 }
 
 UI.prototype.updatePlayerName = function(index, name) {
@@ -63,12 +63,12 @@ UI.prototype.updatePauseText = function(text) {
 	document.querySelector("section.paused .reason").innerHTML = text;
 }
 
-UI.prototype.updateResultText = function(playerOneHasWon, playerTwoHasWon) {
-	console.debug("UI.js: updateResultText({0}, {1})"
+UI.prototype.setWinner = function(playerIndex) {
+	console.debug("UI.js: setWinner({0}, {1})"
 		.format(playerOneHasWon, playerTwoHasWon));
 
-	var playerOneText = (playerOneHasWon)? "win" : "loose";
-	var playerTwoText = (playerTwoHasWon)? "win" : "loose";
+	var playerOneText = (playerIndex === 0)? "win" : "loose";
+	var playerTwoText = (playerIndex === 1)? "win" : "loose";
 	var elementSelector =
 		".results .result[data-player-index='{0}']".format(0);
 	document.querySelector(elementSelector).innerHTML = playerOneText;

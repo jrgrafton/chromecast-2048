@@ -25,8 +25,8 @@ CustomReceiver.prototype.createCastMessageReceiver_ = function() {
 		console.debug("CustomReceiver.js: onSenderConnected()");
 		this.senders[event.senderId] = true;
 		document.dispatchEvent(
-			new CustomEvent("sender-connected", {
-				data : {
+			new CustomEvent("game-should-handle-sender-connect", {
+				"detail" : {
 					sender_index : this.senders.length, 
 					name : "REPLACE_ME_" + Math.random()
 				}
@@ -40,8 +40,8 @@ CustomReceiver.prototype.createCastMessageReceiver_ = function() {
 	this.castReceiverManager.onSenderDisconnected = function(event) {
 		console.debug("CustomReceiver.js: onSenderDisconnected()");
 		document.dispatchEvent(
-			new CustomEvent("sender-disconnected", {
-				data : {
+			new CustomEvent("game-should-handle-sender-disconnect", {
+				"detail" : {
 					sender_index : this.senders.length,
 					reason : "explicit",
 					message : "player has quit the game"
@@ -104,7 +104,7 @@ CustomReceiver.prototype.onMessageGameCommand_ = function(senderIndex, message) 
 	switch (message) {
         case "0":
         	document.dispatchEvent(
-        		new CustomEvent("in-game-move", {
+        		new CustomEvent("game-should-handle-move", {
 					data : {
 	        			direction : "up",
 	        			sender_index : senderIndex 
@@ -114,7 +114,7 @@ CustomReceiver.prototype.onMessageGameCommand_ = function(senderIndex, message) 
         break;
         case "1":
             document.dispatchEvent(
-        		new CustomEvent("in-game-move", {
+        		new CustomEvent("game-should-handle-move", {
 					data : {
 	        			direction : "right",
 	        			sender_index : senderIndex 
@@ -124,7 +124,7 @@ CustomReceiver.prototype.onMessageGameCommand_ = function(senderIndex, message) 
         break;
         case "2":
             document.dispatchEvent(
-        		new CustomEvent("in-game-move", {
+        		new CustomEvent("game-should-handle-move", {
 					data : {
 	        			direction : "down",
 	        			sender_index : senderIndex 
@@ -134,7 +134,7 @@ CustomReceiver.prototype.onMessageGameCommand_ = function(senderIndex, message) 
         break;
         case "3":
             document.dispatchEvent(
-        		new CustomEvent("in-game-move", {
+        		new CustomEvent("game-should-handle-move", {
 					data : {
 	        			direction : "left",
 	        			sender_index : senderIndex 

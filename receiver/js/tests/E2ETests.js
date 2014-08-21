@@ -24,7 +24,7 @@ E2ETests.prototype.runTests = function() {
 	}.bind(this), this.TEST_START_DELAY);
 }
 
-E2ETests.prototype.runNextTest_ = function() 
+E2ETests.prototype.runNextTest_ = function() {
 	console.debug("E2ETests.js: runNextTest_()");
 	try {
 		var testName = this.tests.shift();
@@ -54,16 +54,46 @@ E2ETests.prototype.setup_ = function(callback) {
 		callback();
 	}.bind(this);
 	document.addEventListener("game-did-restart", restartListener);
+
+	// Dispatch restart event
+	document.dispatchEvent(new Event("game-should-restart"));
 }
 
-E2ETests.prototype.testPlayerJoin_ = function(callback) {
-	console.debug("E2ETests.js: testPlayerJoin_()");
+// Utility functions
+E2ETests.prototype.joinTwoPlayers_ = function(callback) {
 	document.dispatchEvent(
-		new CustomEvent("sender-connected", {
-			data : {
-				sender_index : this.senders.length, 
-				name : "E2ETests player"
+		new CustomEvent("game-should-handle-sender-connect", {
+			"detail" : {
+				sender_index : 0, 
+				name : "E2ETests player one"
 			}
 		})
 	);
+
+	document.dispatchEvent(
+		new CustomEvent("game-should-handle-sender-connect", {
+			"detail" : {
+				sender_index : 1, 
+				name : "E2ETests player two"
+			}
+		})
+	);
+
+	callback();
+} 
+
+// Test functions
+E2ETests.prototype.testPlayerJoin_ = function(callback) {
+	console.debug("E2ETests.js: testPlayerJoin_()");
+	this.joinTwoPlayers_(function() {
+		callback();
+	});	
+}
+
+E2ETests.prototype.testGameStart_ = function(callback) {
+	console.debug("E2ETests.js: testGameStart_()");
+	this.joinTwoPlayers_(function() {
+		document.dispatchEvent(new CustomEvent("game-should-start"));
+		callback();
+	});
 }
