@@ -45,10 +45,6 @@ Tile.prototype.hide = function () {
 
 Tile.prototype.show = function () {
   console.debug("tile.js: show()");
-  console.log("tile.js: sprite position is ({0}, {1})".format(
-    this.sprite.position.x, this.sprite.position.y));
-  console.log("tile.js: position is ({0}, {1})".format(
-    this.x, this.y));
   this.sprite.visible = true;
 }
 

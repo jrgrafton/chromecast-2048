@@ -64,8 +64,7 @@ UI.prototype.updatePauseText = function(text) {
 }
 
 UI.prototype.setWinner = function(playerIndex) {
-	console.debug("UI.js: setWinner({0}, {1})"
-		.format(playerOneHasWon, playerTwoHasWon));
+	console.debug("UI.js: setWinner({0})".format(playerIndex));
 
 	var playerOneText = (playerIndex === 0)? "win" : "loose";
 	var playerTwoText = (playerIndex === 1)? "win" : "loose";

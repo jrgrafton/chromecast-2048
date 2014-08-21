@@ -11,7 +11,14 @@ function EventBroker(games, ui) {
 		"down" : 2,
 		"left" : 3
 	}
-	this.countDownStart = null;
+	this.reverseDirectionMap = {
+		0 : "up",
+		1 : "right",
+		2 : "down",
+		3 : "left"
+	}
+	this.countdownStart = null;
+	this.countdownTimeoutFunction = null;
 
 	// Start listening for events
 	this.initObservers_();
@@ -47,8 +54,8 @@ EventBroker.prototype.initObservers_ = function() {
 	}.bind(this));
 
 	// Game interactions
-	document.addEventListener("game-should-handle-move", function(e) {
-		this.handleGameShouldHandleMove_(e.detail);
+	document.addEventListener("game-should-move", function(e) {
+		this.handleGameShouldMove_(e.detail);
 	}.bind(this));
 
 	// Game events
@@ -61,6 +68,18 @@ EventBroker.prototype.initObservers_ = function() {
 			this.games[i].on("game-did-end", function(e) {
 				this.handleGameDidEnd_(e.detail);
 			}.bind(this));
+			this.games[i].on("game-did-move", function(e) {
+				var index = i;
+				var direction = this.reverseDirectionMap[e.detail.direction];
+
+				// Propogate to rest of document so other modules may listen in
+				document.dispatchEvent(new CustomEvent("game-did-move", {
+					"detail" : {
+						sender_index : index,
+						direction: direction
+					}
+				}));
+			}.bind(this));
 		}.bind(this))(i)
 	}
 }
@@ -71,18 +90,34 @@ EventBroker.prototype.handleSenderConnected_ = function(data) {
 	if(this.ui.getState() === "loading") {
 		this.ui.switchToState("lobby");
 	}
+	if(data.sender_count === this.games.length &&
+		this.ui.getState() === "lobby") {
+		
+		// Auto start when two players have joined
+		document.dispatchEvent(new CustomEvent("game-should-start"));
+	}
+	// Reconnecting player from pause state
+	if(this.ui.getState() === "paused") {
+		document.dispatchEvent(new CustomEvent("game-should-resume"));
+	}
 
 	document.dispatchEvent(new Event("game-did-handle-sender-connect"));
 }
 
 EventBroker.prototype.handleSenderDisconnected_ = function(data) {
 	console.debug("EventBroker: handleSenderDisconnected_()");
+
+	// Generic resets
+	this.ui.setLobbyMessage("Waiting for players to join");
+	this.ui.setCountdownNumber("");
+	clearTimeout(this.countdownTimeoutFunction);
+
 	// Player has explicitly quit out
 	if(data.reason === "explicit") {
 		this.ui.updatePlayerName(data.sender_index, "Waiting for player...");
 		if(this.ui.getState() === "in-game") {
-			// If it's a game in progress go to the results screen
-			this.ui.switchToState("results");
+			// If it's a game in progress trigger game did end
+			this.games[data.sender_index].emit("game-did-end", {});
 		} else {
 			// If it's not in game go to lobby screen
 			this.ui.switchToState("lobby");
@@ -95,7 +130,7 @@ EventBroker.prototype.handleSenderDisconnected_ = function(data) {
 			document.dispatchEvent(
 				new CustomEvent("game-should-pause", {
 					"detail" : {
-						reason : data.reason
+						message : data.message
 					}
 				})
 			);
@@ -123,12 +158,13 @@ EventBroker.prototype.handleGameShouldStart_ = function(data) {
 	
 	// Trigger countdown
 	this.ui.setLobbyMessage("Starting in...");
-	this.countDownStart = new Date().getTime();
+	this.countdownStart = new Date().getTime();
 	this.triggerCountdown_();
 }
 
 EventBroker.prototype.triggerCountdown_ = function() {
-	var timeSinceStart = new Date().getTime() - this.countDownStart;
+	console.debug("EventBroker: triggerCountdown_()");
+	var timeSinceStart = new Date().getTime() - this.countdownStart;
 	var countdownNumber =
 				Math.round((this.COUNTDOWN_LENGTH - timeSinceStart) / 1000);
 	if(countdownNumber === 0) {
@@ -140,7 +176,7 @@ EventBroker.prototype.triggerCountdown_ = function() {
 		this.ui.setCountdownNumber("");
 	} else {
 		this.ui.setCountdownNumber(countdownNumber);
-		setTimeout(function() {
+		this.countdownTimeoutFunction = setTimeout(function() {
 			this.triggerCountdown_();
 		}.bind(this), 1000);
 	}
@@ -148,7 +184,7 @@ EventBroker.prototype.triggerCountdown_ = function() {
 
 EventBroker.prototype.handleGameShouldPause_ = function(data) {
 	console.debug("EventBroker: handleGameShouldPause_()");
-	this.ui.updatePauseText(data.reason);
+	this.ui.updatePauseText(data.message);
 	this.ui.switchToState("paused");
 	document.dispatchEvent(new Event("game-did-pause"));
 }
@@ -168,19 +204,8 @@ EventBroker.prototype.handleGameShouldRestart_ = function(data) {
 	document.dispatchEvent(new Event("game-did-restart"));
 }
 
-EventBroker.prototype.handleGameMove_ = function(data) {
-	console.debug("EventBroker: handleGameMove_()");
-
-	// Only respond to moves when in game
-	if(this.ui.getState() === "in-game") {
-		var senderIndex = data.sender_index;
-		var direction = data.direction;
-		this.games[senderIndex].move(this.directionMap[direction]);
-	}
-}
-
-EventBroker.prototype.handleGameShouldHandleMove_ = function(data) {
-	console.debug("EventBroker: handleGameShouldHandleMove_()");
+EventBroker.prototype.handleGameShouldMove_ = function(data) {
+	console.debug("EventBroker: handleGameShouldMove_()");
 
 	// Only respond to moves when in game
 	if(this.ui.getState() === "in-game") {
@@ -196,13 +221,21 @@ EventBroker.prototype.handleGameDidScore_ = function(data) {
 	var score = data.score;
 
 	this.ui.updatePlayerScore(index, score);
+
+	// Propogate to rest of document so other modules may listen in
+	document.dispatchEvent(new CustomEvent("game-did-score", {
+		"detail" : {
+			sender_index : index,
+			score : score
+		}
+	}));
 }
 
 EventBroker.prototype.handleGameDidEnd_ = function(data) {
 	console.debug("EventBroker: handleGameDidEnd_()");
 	
 	// See who has won
-	var topScore = 0;
+	var topScore = -1;
 	var winner = -1;
 	for(var i = 0; i < this.games.length; i++) {
 		if(this.games[i].score > topScore) {
@@ -212,4 +245,7 @@ EventBroker.prototype.handleGameDidEnd_ = function(data) {
 	}
 	this.ui.setWinner(winner);
 	this.ui.switchToState("results");
+
+	// Propogate to rest of document so other modules may listen in
+	document.dispatchEvent(new Event("game-did-end"));
 }

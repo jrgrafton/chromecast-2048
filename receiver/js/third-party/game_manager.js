@@ -89,7 +89,7 @@ GameManager.prototype.moveTile = function (tile, cell) {
 GameManager.prototype.onFinishedAnimating = function() {
   if (this.storedMove != null) {
     this.move(this.storedMove);
-    this.storedMove = null;
+    //this.storedMove = null;
   }   
 }
 
@@ -134,7 +134,6 @@ GameManager.prototype.move = function (direction) {
           self.grid.markTileAsMerging(tile);
 
           // Converge the two tiles' positions
-          console.log(positions.next);
           tile.updatePosition(positions.next);
 
           // Update the score
@@ -183,6 +182,12 @@ GameManager.prototype.move = function (direction) {
 
     this.grid.updateTileSprites();
   }
+
+  self.emit("game-did-move", {
+    "detail" : {
+      direction : direction
+    }
+  });
 };
 
 // Get the vector representing the chosen direction
