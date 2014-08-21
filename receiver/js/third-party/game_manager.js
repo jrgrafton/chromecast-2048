@@ -9,8 +9,7 @@ function GameManager(canvas, size) {
   this.won            = false;
   this.keepPlaying    = false;
   this.storedMove     = null;
-
-  console.log(canvas);
+  this.events         = {};
 
   // Create game renderer
   this.renderer = new Renderer(canvas, this.update.bind(this), function() {
@@ -24,6 +23,22 @@ function GameManager(canvas, size) {
     this.inputManager.on("move", this.move.bind(this));
   }.bind(this));
 }
+
+GameManager.prototype.on = function (event, callback) {
+  if (!this.events[event]) {
+    this.events[event] = [];
+  }
+  this.events[event].push(callback);
+};
+
+GameManager.prototype.emit = function (event, data) {
+  var callbacks = this.events[event];
+  if (callbacks) {
+    callbacks.forEach(function (callback) {
+      callback(data);
+    });
+  }
+};
 
 // Restart the game
 GameManager.prototype.restart = function () {
@@ -74,7 +89,7 @@ GameManager.prototype.moveTile = function (tile, cell) {
 GameManager.prototype.onFinishedAnimating = function() {
   if (this.storedMove != null) {
     this.move(this.storedMove);
-    this.storedMove = null;
+    //this.storedMove = null;
   }   
 }
 
@@ -119,17 +134,28 @@ GameManager.prototype.move = function (direction) {
           self.grid.markTileAsMerging(tile);
 
           // Converge the two tiles' positions
-          console.log(positions.next);
           tile.updatePosition(positions.next);
 
           // Update the score
           self.score += merged.value;
+          self.emit("game-did-score", {
+            "detail" : {
+              "score": self.score
+            }
+          });
 
           // Show merged tile
           merged.show();
 
           // The mighty 2048 tile
-          if (merged.value === 2048) self.won = true;
+          if (merged.value === 2048) { 
+            self.won = true;
+            self.emit("game-did-end", {
+              "detail" : {
+                "reason": "2048"
+              }
+            })
+          }
         } else {
           self.moveTile(tile, positions.farthest);
         }
@@ -146,10 +172,22 @@ GameManager.prototype.move = function (direction) {
 
     if (!this.movesAvailable()) {
       this.over = true; // Game over!
+      // Dispatch event
+      self.emit("game-did-end", {
+        "detail" : {
+          "reason": "out of moves"
+        }
+      })
     }
 
     this.grid.updateTileSprites();
   }
+
+  self.emit("game-did-move", {
+    "detail" : {
+      direction : direction
+    }
+  });
 };
 
 // Get the vector representing the chosen direction

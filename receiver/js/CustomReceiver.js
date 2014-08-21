@@ -5,6 +5,7 @@ function CustomReceiver()  {
 
 	// Member vars
 	this.senders = [];
+	this.senderNames = [];
 	this.castReceiverManager = null;
 	this.gameMessageBus = null;
 	this.socketMessageBus = null;
@@ -20,15 +21,40 @@ function CustomReceiver()  {
 
 CustomReceiver.prototype.createCastMessageReceiver_ = function() {
 	console.debug("CustomReceiver.js: createCastMessageReceiver_()");
-
 	this.castReceiverManager = cast.receiver.CastReceiverManager.getInstance();
 	this.castReceiverManager.onSenderConnected = function(event) {
-		this.senders[event.senderId] = true;
-		document.dispatchEvent("sender-connected", { name : "REPLACE_ME" });
+		console.debug("CustomReceiver.js: onSenderConnected()");
+		this.senders.push(event.senderId);
+		document.dispatchEvent(
+			new CustomEvent("game-should-handle-sender-connect", {
+				"detail" : {
+					sender_index : this.senders.indexOf(event.senderId),
+					sender_count : this.senders.length,
+					name : "REPLACE_ME_" + Math.random()
+				}
+			})
+		);
+
+		// TODO: send message back to sender if maximum players have
+		// been exceeded
+
 	}
 	this.castReceiverManager.onSenderDisconnected = function(event) {
-		delete this.senders[event.senderId];
-		document.dispatchEvent("sender-disconnected", { reason : "explicit" });
+		console.debug("CustomReceiver.js: onSenderDisconnected()");
+		document.dispatchEvent(
+			new CustomEvent("game-should-handle-sender-disconnect", {
+				"detail" : {
+					sender_index : this.senders.indexOf(event.senderId),
+					reason : "explicit",
+					message : "player has quit the game"
+				}
+			})
+		);
+		this.senders.splice(
+			this.senders[this.senders.indexOf(event.senderId)], 1);
+		if(this.senders.length === 0) {
+			this.castReceiverManager.stop();
+		}
 	}
 }
 
@@ -79,20 +105,48 @@ CustomReceiver.prototype.onMessageGameCommand_ = function(senderIndex, message) 
 			senderIndex, message);
 
 	switch (message) {
-        case "0" :
-        	document.dispatchEvent(senderIndex + "-move", { direction : "up" });
+        case "0":
+        	document.dispatchEvent(
+        		new CustomEvent("game-should-move", {
+					"detail" : {
+	        			direction : "up",
+	        			sender_index : senderIndex 
+					}
+				})
+			);
         break;
-        case "1" :
-        	document.dispatchEvent(senderIndex + "-move", { direction : "right" });
+        case "1":
+            document.dispatchEvent(
+        		new CustomEvent("game-should-move", {
+					"detail" : {
+	        			direction : "right",
+	        			sender_index : senderIndex 
+					}
+				})
+			);
         break;
-        case "2" :
-        	document.dispatchEvent(senderIndex + "-move", { direction : "down" });
+        case "2":
+            document.dispatchEvent(
+        		new CustomEvent("game-should-move", {
+					"detail" : {
+	        			direction : "down",
+	        			sender_index : senderIndex 
+					}
+				})
+			);
         break;
-        case "3" :
-        	document.dispatchEvent(senderIndex + "-move", { direction : "left" });
+        case "3":
+            document.dispatchEvent(
+        		new CustomEvent("game-should-move", {
+					"detail" : {
+	        			direction : "left",
+	        			sender_index : senderIndex 
+					}
+				})
+			);
         break;
-        case "4" :
-        	document.dispatchEvent("game-should-restart");
+        case "4":
+            document.dispatchEvent(new CustomEvent("game-should-restart"));
         break;
     }
 }
