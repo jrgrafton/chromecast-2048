@@ -105,7 +105,7 @@ CustomReceiver.prototype.addSender_ = function(senderId) {
 		sender_id : senderId,
 		sender_state : this.SENDER_STATUS.CONNECTED,
 		sender_name : "Player " + (this.senderCount + 1),
-		sender_host : (this.senderCount === 0)
+		sender_host : (this.senderCount === 0),
 		heartbeat_time : new Date().getTime()
 	};
 
@@ -360,8 +360,11 @@ CustomReceiver.prototype.onMessageGameCommand_ =
             document.dispatchEvent(new CustomEvent("game-should-start"));
         break;
         case this.SENDER_RECEIVER_MESSAGES.PLAYER_NAME:
-        	// TODO - broadcast host
-        	
+        	// If 
+        	if(this.senders[senderIndex].sender_host) {
+
+        	}
+
         	this.updateSenderName_(senderIndex, dataString);
             document.dispatchEvent(
             	new CustomEvent("game-should-handle-sender-name-update", {
@@ -369,7 +372,7 @@ CustomReceiver.prototype.onMessageGameCommand_ =
             			name : dataString,
             			sender_index : senderIndex
             		}
-            	});
+            	})
             );
         break;
         case this.SENDER_RECEIVER_MESSAGES.PONG:
