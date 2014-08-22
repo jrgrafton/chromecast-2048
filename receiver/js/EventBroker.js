@@ -93,8 +93,8 @@ EventBroker.prototype.handleSenderConnected_ = function(data) {
 	if(data.sender_count === this.games.length &&
 		this.ui.getState() === "lobby") {
 		
-		// Auto start when two players have joined
-		document.dispatchEvent(new CustomEvent("game-should-start"));
+		// Update Lobby message
+		this.ui.setLobbyMessage(data.name + ": tap start to begin");
 	}
 	// Reconnecting player from pause state
 	if(this.ui.getState() === "paused") {
