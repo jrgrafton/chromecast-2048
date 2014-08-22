@@ -196,8 +196,13 @@ E2ETests.prototype.testGameDisconnectScenarios_ = function(callback) {
 	document.addEventListener("game-did-resume", didResumeListener);
 	document.addEventListener("game-did-end", didEndListener);
 
-	// Join two players
-	this.joinTwoPlayers_(function() {});	
+	// Join two players and start game
+	this.joinTwoPlayers_(function() {
+		// Start game when both players have joined
+		document.dispatchEvent(
+			new CustomEvent("game-should-start", { "detail" : {} })
+		);
+	})
 }
 
 E2ETests.prototype.testGamePlaythrough_ = function(callback) {
@@ -247,8 +252,13 @@ E2ETests.prototype.testGamePlaythrough_ = function(callback) {
 		callback();
 	}.bind(this);
 
-	this.joinTwoPlayers_(function() {});
 	document.addEventListener("game-did-start", didStartListener);
 	document.addEventListener("game-did-move", didMoveListener);
 	document.addEventListener("game-did-end", didEndListener);
+	this.joinTwoPlayers_(function() {
+		// Start game when both players have joined
+		document.dispatchEvent(
+			new CustomEvent("game-should-start", { "detail" : {} })
+		);
+	});
 }
