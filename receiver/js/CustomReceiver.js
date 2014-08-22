@@ -25,7 +25,8 @@ function CustomReceiver()  {
 	this.RECEIVER_SENDER_MESSAGES = {
 		JOIN_FAILED_TOO_MANY_PLAYERS : "0",
 		JOIN_SUCCESSFUL : "1",
-		PING : "2"
+		HOST_ALLOCATED : "2",
+		PING : "3"
 	}
 
 	// Member vars
@@ -68,8 +69,8 @@ CustomReceiver.prototype.onSenderConnected_ = function(event) {
 			new CustomEvent("game-should-handle-sender-connect", {
 				"detail" : {
 					sender_index : this.getSenderIndex_(event.senderId),
-					sender_count : this.senderCount;,
-					name : "Player " + this.getSenderIndex_(event.senderId) + 1
+					sender_count : this.senderCount,
+					name : "Player "+(this.getSenderIndex_(event.senderId) + 1)
 				}
 			})
 		);
@@ -79,7 +80,9 @@ CustomReceiver.prototype.onSenderConnected_ = function(event) {
 }
 
 CustomReceiver.prototype.onSenderDisconnected_ = function(event) {
-	console.debug("CustomReceiver.js: onSenderDisconnected()");
+	console.debug("CustomReceiver.js: onSenderDisconnected_()");
+	this.removeSender_(event.senderId);
+
 	document.dispatchEvent(
 		new CustomEvent("game-should-handle-sender-disconnect", {
 			"detail" : {
@@ -89,8 +92,7 @@ CustomReceiver.prototype.onSenderDisconnected_ = function(event) {
 			}
 		})
 	);
-	this.removeSender_(event.senderId);
-	if(this.senders.length === 0) {
+	if(this.senderCount === 0) {
 		this.castReceiverManager.stop();
 	}
 }
@@ -98,13 +100,14 @@ CustomReceiver.prototype.onSenderDisconnected_ = function(event) {
 CustomReceiver.prototype.addSender_ = function(senderId) {
 	console.debug("CustomReceiver.js: addSender_({0})".format(senderId));
 
+	var senderAdded = false;
 	var sender = {
 		sender_id : senderId,
 		sender_state : this.SENDER_STATUS.CONNECTED,
-		sender_name : "Player " + (this.senders.length + 1)
+		sender_name : "Player " + (this.senderCount + 1),
+		sender_host : (this.senderCount === 0)
 		heartbeat_time : new Date().getTime()
 	};
-	var senderAdded = false;
 
 	// Fill holes first
 	for(var i = 0; i < this.senders.length; i++) {
@@ -118,6 +121,13 @@ CustomReceiver.prototype.addSender_ = function(senderId) {
 	if(!senderAdded) {
 		this.senders.push(sender);
 	}
+
+	// Allocate this player as host if applicable
+	if(sender.sender_host) {
+		this.allocateNewHostSender_();
+	}
+
+
 	++this.senderCount;
 }
 
@@ -128,10 +138,27 @@ CustomReceiver.prototype.removeSender_ = function(senderId) {
 		if(this.senders[i] === null) continue; // May have holes in array
 
 		if(this.senders[i].sender_id === senderId) {
-			clearInterval(this.senders[i].heartbeat_interval_object);
+			// Do we need to allocate a new host?
+			if(this.senders[i].sender_host) {
+				this.allocateNewHostSender_();
+			}
 			delete this.senders[i];
 			--this.senderCount;
 			break;
+		}
+	}
+}
+
+CustomReceiver.prototype.allocateNewHostSender_ = function() {
+	for(var i = 0; i < this.senders.length; i++) {
+		if(this.senders[i] !== null) {
+			this.senders[i].sender_host = true;
+
+			// Let everyone know who new host is!
+			this.gameMessageBus.broadcast(
+				this.RECEIVER_SENDER_MESSAGES.HOST_ALLOCATED + ":"
+				+ this.senders[i].senderId + "_" +
+				+ this.senders[i].sender_name);
 		}
 	}
 }
@@ -142,23 +169,21 @@ CustomReceiver.prototype.getSender_ = function(senderId) {
 	for(var i = 0; i < this.senders.length; i++) {
 		if(this.senders[i] === null) continue; // May have holes in array
 		if(this.senders[i].sender_id === senderId) {
-			return this.senders.splice(i, 1);
+			return this.senders[i];
 		}
 	}
 }
 
 CustomReceiver.prototype.getSenderIndex_ = function(senderId) {
 	console.debug("CustomReceiver.js: getSender_({0})".format(senderId));
-	var index = -1;
+
 	for(var i = 0; i < this.senders.length; i++) {
 		if(this.senders[i] === null) continue; // May have holes in array
 		if(this.senders[i].sender_id === senderId) {
-			index = i;
-			break;
+			return i;
 		}
 	}
-
-	return index;
+	return -1;
 }
 
 CustomReceiver.prototype.updateSenderName_ = function(senderId, senderName) {
@@ -232,8 +257,12 @@ CustomReceiver.prototype.startGameMessageChannel_ = function() {
 	this.gameMessageBus =
 		this.castReceiverManager.getCastMessageBus(this.NAMESPACE);
 	this.gameMessageBus.onMessage = function(event) {
-		var senderIndex = this.senders.indexOf(event.senderId);
-		this.onMessageGameCommand_(event.data, senderIndex, );
+		var senderIndex = this.getSenderIndex_(event.senderId);
+		var command = event.data.split(":")[0];
+	    var dataString = (dataString.length === 2)? dataString[1] : null;
+
+		this.onMessageGameCommand_(event.senderId, senderIndex,
+			command, dataString);
 	}.bind(this);
 }
 
@@ -243,18 +272,17 @@ CustomReceiver.prototype.startSocketMessageChannel_ = function() {
 		this.castReceiverManager.getCastMessageBus(this.NAMESPACE_WEBSOCKET);
 
 	this.socketMessageBus.onMessage = function(event) {
-		var senderIndex = this.senders.indexOf(event.senderId);
-		var dataString = event.data.split(":");
-	    dataString = (dataString.length === 2)? dataString[1] : null;
-		this.startWebSocketConnection_(event.data, senderIndex, dataString);
+		var senderIndex = this.getSenderIndex_(event.senderId);
+		this.startWebSocketConnection_(event.data, senderIndex);
 	}.bind(this);
 
 }
 
 CustomReceiver.prototype.startWebSocketConnection_ =
 	function(address, senderIndex) {
-	
-	console.debug("CustomReceiver.js: startWebSocketConnection_({0})", address);
+	console.debug("CustomReceiver.js: startWebSocketConnection_({0}, {1})",
+		address, senderIndex);
+
 	var connection = new WebSocket('ws://'+ address);
 	// When the connection is open, send some data to the server
 	connection.onopen = function () {
@@ -270,19 +298,21 @@ CustomReceiver.prototype.startWebSocketConnection_ =
 	// Log messages from the server
 	connection.onmessage = function (event) {
 	    console.log("websocket.onMessage");
-	    var dataString = event.data.split(":");
-	    dataString = (dataString.length === 2)? dataString[1] : null;
-	    this.onMessageGameCommand_(senderIndex, event.data, dataString);
+	    var command = event.data.split(":")[0];
+	    var dataString = (dataString.length === 2)? dataString[1] : null;
+
+		this.onMessageGameCommand_(event.senderId, senderIndex,
+			command, dataString);
 	}.bind(this);
 }
 
 CustomReceiver.prototype.onMessageGameCommand_ =
-	function(senderIndex, message, dataString) {
+	function(senderId, senderIndex, command, dataString) {
 
-	console.debug("CustomReceiver.js: onMessageGameCommand_({0},{1})",
-			senderIndex, message);
+	console.debug("CustomReceiver.js: onMessageGameCommand_({0}, {1}, {2}, {3})",
+			senderId, senderIndex, command, dataString);
 
-	switch (message) {
+	switch (command) {
         case this.SENDER_RECEIVER_MESSAGES.UP:
         	document.dispatchEvent(
         		new CustomEvent("game-should-move", {
@@ -330,18 +360,20 @@ CustomReceiver.prototype.onMessageGameCommand_ =
             document.dispatchEvent(new CustomEvent("game-should-start"));
         break;
         case this.SENDER_RECEIVER_MESSAGES.PLAYER_NAME:
+        	// TODO - broadcast host
+        	
         	this.updateSenderName_(senderIndex, dataString);
-
             document.dispatchEvent(
-            	new CustomEvent("game-should-handle-sender-name-update"), {
+            	new CustomEvent("game-should-handle-sender-name-update", {
             		"detail" : {
             			name : dataString,
             			sender_index : senderIndex
             		}
             	});
+            );
         break;
         case this.SENDER_RECEIVER_MESSAGES.PONG:
-        	this.updateSenderHeartbeatTime_(senderIndex);
+        	this.updateSenderHeartbeatTime_(senderId);
         break;
     }
 }
